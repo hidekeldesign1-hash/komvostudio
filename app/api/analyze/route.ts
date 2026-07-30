@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { AnalyzeSchema } from "@/lib/schemas";
 import { computeRules, maturity, coordinates } from "@/lib/rules";
-import { runAnalysis } from "@/lib/anthropic";
+import { runAnalysis } from "@/lib/analysis";
 import { updateLead, nowIso } from "@/lib/sheets";
 import { rateLimit, clientIp } from "@/lib/rateLimit";
 
@@ -41,29 +41,33 @@ export async function POST(req: Request) {
       channels: a.acquisition_channels, assets: a.existing_assets, goals: a.selected_goals
     });
 
-    const analysis = await runAnalysis({ answers: a, rules, maturity: mat, coordinates: coords });
+    const analysis = runAnalysis({ answers: a, rules, maturity: mat, coordinates: coords });
 
-    /* Guardar todo: el perfil interno se queda en la hoja, no viaja al navegador. */
+    /* Guardar todo: el perfil interno se queda en la hoja, no viaja al navegador.
+       Apps Script puede tardar decenas de segundos en frío, así que la escritura
+       ocurre después de responder para no dejar al usuario esperando. */
     const monthlyText = rules.monthly.map(m => `${m.label}: ${m.range}`).join(" | ");
-    try {
-      await updateLead(lead_id, {
-        updated_at: nowIso(), status: "Quiz completado", completion_percentage: "100",
-        last_step: "result",
-        brand_maturity: mat.brandMaturity, commercial_maturity: mat.commercialMaturity,
-        technological_maturity: mat.technologicalMaturity,
-        complexity_score: String(rules.score),
-        project_tier: rules.personalizedEvaluation ? "Requiere evaluación personalizada" : rules.tier,
-        price_range: rules.personalizedEvaluation ? "Evaluación personalizada" : rules.priceRange,
-        timeline_range: rules.personalizedEvaluation ? "Evaluación personalizada" : rules.timelineRange,
-        monthly_range: monthlyText,
-        client_result: JSON.stringify(analysis.clientResult).slice(0, 45000),
-        internal_profile: JSON.stringify(analysis.internalProfile).slice(0, 45000),
-        lead_score: String(analysis.internalProfile.leadScore),
-        next_step: analysis.internalProfile.nextStep
-      });
-    } catch (sheetError) {
-      console.warn("analyze: no se pudo persistir en Sheets", sheetError);
-    }
+    after(async () => {
+      try {
+        await updateLead(lead_id, {
+          updated_at: nowIso(), status: "Quiz completado", completion_percentage: "100",
+          last_step: "result",
+          brand_maturity: mat.brandMaturity, commercial_maturity: mat.commercialMaturity,
+          technological_maturity: mat.technologicalMaturity,
+          complexity_score: String(rules.score),
+          project_tier: rules.personalizedEvaluation ? "Requiere evaluación personalizada" : rules.tier,
+          price_range: rules.personalizedEvaluation ? "Evaluación personalizada" : rules.priceRange,
+          timeline_range: rules.personalizedEvaluation ? "Evaluación personalizada" : rules.timelineRange,
+          monthly_range: monthlyText,
+          client_result: JSON.stringify(analysis.clientResult).slice(0, 45000),
+          internal_profile: JSON.stringify(analysis.internalProfile).slice(0, 45000),
+          lead_score: String(analysis.internalProfile.leadScore),
+          next_step: analysis.internalProfile.nextStep
+        }, { timeoutMs: 45_000 });
+      } catch (sheetError) {
+        console.warn("analyze: no se pudo persistir en Sheets", sheetError);
+      }
+    });
 
     return NextResponse.json({
       ok: true,
@@ -76,14 +80,8 @@ export async function POST(req: Request) {
     });
   } catch (e) {
     console.error("analyze", e);
-    const missingKey =
-      e instanceof Error && /ANTHROPIC|api.?key|authentication/i.test(e.message);
     return NextResponse.json(
-      {
-        error: missingKey
-          ? "Falta ANTHROPIC_API_KEY en .env.local para generar el diagnóstico."
-          : "No pudimos generar el diagnóstico en este momento. Intenta de nuevo en unos segundos.",
-      },
+      { error: "No pudimos generar el diagnóstico en este momento. Intenta de nuevo en unos segundos." },
       { status: 502 }
     );
   }

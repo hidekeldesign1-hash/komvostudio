@@ -7,7 +7,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import * as D from "@/lib/quizData";
-import { computeRules } from "@/lib/rules";
 import type { ClientResult } from "@/lib/schemas";
 
 type Answers = Record<string, any>;
@@ -22,35 +21,6 @@ function formatMxPhone(raw: string): string {
   if (digits.length <= 2) return digits;
   if (digits.length <= 6) return `${digits.slice(0, 2)} ${digits.slice(2)}`;
   return `${digits.slice(0, 2)} ${digits.slice(2, 6)} ${digits.slice(6)}`;
-}
-
-/* ── fondo espacial: partículas discretas en canvas ── */
-function Sky() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const c = ref.current; if (!c) return;
-    const x = c.getContext("2d"); if (!x) return;
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let W = 0, H = 0, raf = 0;
-    const dots = Array.from({ length: 90 }, () => ({
-      px: Math.random(), py: Math.random(), r: Math.random() * 1.3 + 0.3,
-      s: Math.random() * 0.00012 + 0.00003, o: Math.random() * 0.5 + 0.15
-    }));
-    const size = () => { W = c.width = innerWidth * devicePixelRatio; H = c.height = innerHeight * devicePixelRatio; };
-    size(); addEventListener("resize", size);
-    const draw = (t: number) => {
-      x.clearRect(0, 0, W, H);
-      for (const d of dots) {
-        const yy = ((d.py + (reduce ? 0 : t * d.s)) % 1) * H;
-        x.beginPath(); x.arc(d.px * W, yy, d.r * devicePixelRatio, 0, 7);
-        x.fillStyle = `rgba(220,230,255,${d.o})`; x.fill();
-      }
-      if (!reduce) raf = requestAnimationFrame(draw);
-    };
-    raf = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(raf); removeEventListener("resize", size); };
-  }, []);
-  return <canvas ref={ref} className="k-sky" aria-hidden />;
 }
 
 /* ── sonido breve, elegante y desactivable ── */
@@ -175,8 +145,7 @@ const BASE_STEPS: StepDef[] = [
   { id: "t1", chapter: 2 }, { id: "s4", chapter: 2 }, { id: "coord", chapter: 2 },
   { id: "t2", chapter: 3 }, { id: "s5", chapter: 3 },
   { id: "s6", chapter: 4 }, { id: "s7", chapter: 5 }, { id: "s8", chapter: 5 },
-  { id: "s9", chapter: 5 }, { id: "identity", chapter: 4 }, { id: "s10", chapter: 6 },
-  { id: "invest", chapter: 6 }
+  { id: "s9", chapter: 5 }, { id: "identity", chapter: 4 }, { id: "s10", chapter: 6 }
 ];
 
 export default function QuizExperience() {
@@ -197,7 +166,15 @@ export default function QuizExperience() {
       const raw = localStorage.getItem(LS_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        if (s.leadId) { setLeadId(s.leadId); setAnswers(s.answers || {}); setIdx(s.idx || 0); setPhase(s.phase === "result" ? "cover" : (s.phase || "cover")); }
+        if (s.leadId) {
+          setLeadId(s.leadId);
+          setAnswers(s.answers || {});
+          setIdx(s.idx || 0);
+          // "analyzing" y "error" no se pueden retomar solas: sin petición viva
+          // la pantalla se quedaría girando para siempre.
+          const saved: Phase = s.phase || "cover";
+          setPhase(saved === "result" ? "cover" : saved === "analyzing" || saved === "error" ? "quiz" : saved);
+        }
       }
     } catch {}
   }, []);
@@ -220,26 +197,6 @@ export default function QuizExperience() {
   const step = steps[Math.min(idx, steps.length - 1)];
   const progress = phase === "quiz" ? Math.round(((idx + 1) / (steps.length + 1)) * 100) : phase === "result" ? 100 : 0;
 
-  /* estimación orientativa con el mismo motor determinista (el servidor recalcula al analizar) */
-  const estimate = useMemo(() => {
-    const r = computeRules({
-      selectedServices: answers.selected_services || [],
-      numberOfPages: answers.number_of_pages,
-      productVolume: answers.product_volume,
-      numberOfRoutes: answers.number_of_routes,
-      existingAssets: answers.existing_assets || [],
-      availableMaterials: answers.available_materials || [],
-      mainOfferDefined: answers.main_offer ? answers.main_offer !== "Todavía lo estoy definiendo." : false,
-      numberOfApprovers: answers.number_of_approvers,
-      desiredStart: answers.desired_start,
-      followUpCapacity: answers.follow_up_capacity,
-      requiredIntegrations: answers.required_integrations || []
-    });
-    return r.personalizedEvaluation
-      ? { tier: "Requiere evaluación personalizada", range: "un alcance que definiremos contigo en una evaluación personalizada" }
-      : { tier: r.tier, range: r.priceRange };
-  }, [answers]);
-
   /* guardado progresivo (nunca bloquea la experiencia) */
   const save = useCallback((extra: Partial<{ status: string; completion_percentage: number; last_step: string }> = {}, ans?: Answers) => {
     if (!leadId) return;
@@ -255,12 +212,22 @@ export default function QuizExperience() {
 
   const setA = (k: string, v: any) => setAnswers(p => { const n = { ...p, [k]: v }; persist({ answers: n }); return n; });
   const toggle = (k: string, v: string, max?: number) => {
-
     setAnswers(p => {
       const cur: string[] = p[k] || [];
       let n = cur.includes(v) ? cur.filter(x => x !== v) : [...cur, v];
       if (max && n.length > max) n = n.slice(n.length - max);
-      const nn = { ...p, [k]: n }; persist({ answers: nn }); return nn;
+      const nn: Answers = { ...p, [k]: n };
+      if (k === "collaboration_selected" && p.collaboration_style && !n.includes(p.collaboration_style)) {
+        nn.collaboration_style = "";
+      }
+      if (k === "offers_selected" && p.main_offer && !n.includes(p.main_offer)) {
+        nn.main_offer = "";
+      }
+      if (k === "selected_goals" && p.main_goal && !n.includes(p.main_goal)) {
+        nn.main_goal = "";
+      }
+      persist({ answers: nn });
+      return nn;
     });
   };
 
@@ -287,18 +254,24 @@ export default function QuizExperience() {
   };
 
   const finish = async () => {
-    setPhase("analyzing"); persist({ phase: "analyzing" });
+    setPhase("analyzing"); persist({ phase: "quiz" });
     save({ completion_percentage: 96, last_step: "analyzing" });
     try {
       const r = await fetch("/api/analyze", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lead_id: leadId, answers })
+        body: JSON.stringify({ lead_id: leadId, answers }),
+        signal: AbortSignal.timeout(30_000)
       });
       const j = await r.json();
       if (!r.ok || !j.ok) throw new Error(j.error || "Error de análisis");
       setResult(j); setPhase("result"); persist({ phase: "result" });
     } catch (e: any) {
-      setErrMsg(e?.message || "No pudimos generar el diagnóstico.");
+      const timedOut = e?.name === "TimeoutError" || e?.name === "AbortError";
+      setErrMsg(
+        timedOut
+          ? "El diagnóstico tardó demasiado en responder. Intenta de nuevo."
+          : e?.message || "No pudimos generar el diagnóstico."
+      );
       setPhase("error");
     }
   };
@@ -369,7 +342,7 @@ export default function QuizExperience() {
               <input placeholder="Escribe o selecciona una categoría" value={q}
                 onChange={e => setA("cat_query", e.target.value)} aria-label="Buscar categoría" />
             </div>
-            <div className="k-opts duo k-single" style={{ marginTop: 16 }}>
+            <div className="k-opts duo k-single" style={{ marginTop: 16 }} data-k-incomplete={!a.category || undefined}>
               {list.map(o => (
                 <OptBtn pulse={pulse} key={o.id} sel={a.category === o.id} on={() => setA("category", o.id)}>{o.label}</OptBtn>
               ))}
@@ -379,7 +352,7 @@ export default function QuizExperience() {
             </div>
             {a.category && <CategoryVisual seed={a.category} />}
             {fb && <div className="k-feedback">{fb}</div>}
-            <div className="k-fields" style={{ marginTop: 30 }}>
+            <div className="k-fields" style={{ marginTop: 30 }} data-k-incomplete={((a.business_description || "").trim().length < 10 || (a.target_audience || "").trim().length < 3) || undefined}>
               <div>
                 <label>{D.STEP1_OPEN.q2Title}</label>
                 <textarea rows={4} placeholder={D.STEP1_OPEN.q2Hint}
@@ -415,10 +388,16 @@ export default function QuizExperience() {
             {sel.length > 0 && (
               <>
                 <p className="k-sub" style={{ marginTop: 28 }}>{D.OFFER_PRIORITIZE}</p>
-                <div className="k-opts duo k-single" style={{ marginTop: 14 }}>
-                  {sel.map(s => (
-                    <OptBtn pulse={pulse} key={s} sel={a.main_offer === s} on={() => setA("main_offer", s)}>{s}</OptBtn>
-                  ))}
+                <div
+                  className="k-priority"
+                  data-k-incomplete={!a.main_offer || undefined}
+                >
+                  <p className="k-priority-label">Elige tu oferta principal</p>
+                  <div className="k-opts">
+                    {sel.map(s => (
+                      <OptBtn pulse={pulse} key={s} variant="priority" sel={a.main_offer === s} on={() => setA("main_offer", s)}>{s}</OptBtn>
+                    ))}
+                  </div>
                 </div>
               </>
             )}
@@ -514,10 +493,18 @@ export default function QuizExperience() {
             {sel.length > 0 && (
               <>
                 <p className="k-sub" style={{ marginTop: 28 }}>{D.GOAL_PRIORITY.q}</p>
-                <div className="k-opts duo k-single" style={{ marginTop: 14 }}>
-                  {sel.map(s => <OptBtn pulse={pulse} key={s} sel={a.main_goal === s} on={() => setA("main_goal", s)}>{s}</OptBtn>)}
+                <div
+                  className="k-priority"
+                  data-k-incomplete={!a.main_goal || undefined}
+                >
+                  <p className="k-priority-label">Elige tu prioridad principal</p>
+                  <div className="k-opts">
+                    {sel.map(s => (
+                      <OptBtn pulse={pulse} key={s} variant="priority" sel={a.main_goal === s} on={() => setA("main_goal", s)}>{s}</OptBtn>
+                    ))}
+                  </div>
+                  {a.main_goal && <div className="k-feedback">{D.GOAL_PRIORITY.note}</div>}
                 </div>
-                {a.main_goal && <div className="k-feedback">{D.GOAL_PRIORITY.note}</div>}
               </>
             )}
             <ContinueBtn onNext={next} ok={sel.length > 0 && !!a.main_goal} />
@@ -562,8 +549,25 @@ export default function QuizExperience() {
             <p className="k-sub" style={{ marginTop: 26 }}>¿Cómo te gustaría que trabajáramos contigo? <span style={{ color: "var(--faint)" }}>(elige hasta dos y prioriza una)</span></p>
             <MultiGrid selected={a.collaboration_selected||[]} opts={mk(D.COLLABORATION)} pulse={pulse} onToggle={v=>toggle("collaboration_selected",v,2)} />
             {collab.length > 0 && (
-              <div className="k-opts duo k-single" style={{ marginTop: 14 }}>
-                {collab.map(c => <OptBtn pulse={pulse} key={c} sel={a.collaboration_style === c} on={() => setA("collaboration_style", c)}>Prioridad: {c}</OptBtn>)}
+              <div
+                className="k-priority"
+                data-k-incomplete={!a.collaboration_style || undefined}
+              >
+                <p className="k-priority-label">Ahora elige cuál es tu prioridad</p>
+                <p className="k-priority-hint">Selecciona una de las opciones que marcaste arriba para continuar.</p>
+                <div className="k-opts">
+                  {collab.map(c => (
+                    <OptBtn
+                      pulse={pulse}
+                      key={c}
+                      variant="priority"
+                      sel={a.collaboration_style === c}
+                      on={() => setA("collaboration_style", c)}
+                    >
+                      {c}
+                    </OptBtn>
+                  ))}
+                </div>
               </div>
             )}
             <ContinueBtn onNext={next} ok={(a.available_materials || []).length > 0 && (a.required_integrations || []).length > 0 &&
@@ -592,30 +596,9 @@ export default function QuizExperience() {
         <>
           <Heading title="¿Cuándo te gustaría comenzar a darle forma?" />
           <SingleGrid value={a.desired_start} opts={D.TIMING} pulse={pulse} onPick={v=>setA("desired_start",v)} />
-          <ContinueBtn onNext={next} ok={!!a.desired_start} />
+          <ContinueBtn onNext={next} ok={!!a.desired_start} label="Ver mi ruta" />
         </>
       );
-      case "invest": {
-        // Estimación orientativa en pantalla; el servidor recalcula al analizar.
-        const est = estimate;
-        return (
-          <>
-            {est ? (
-              <div className="k-glass k-block">
-                <p style={{ color: "var(--text)", fontSize: 17 }}>
-                  Por lo que nos has contado, tu proyecto comienza a tomar la forma de{" "}
-                  <strong style={{ fontWeight: 500 }}>{est.tier}</strong>.
-                </p>
-                <p style={{ marginTop: 12 }}>Un desarrollo de este nivel suele encontrarse inicialmente dentro de <strong style={{ fontWeight: 500, color: "var(--text)" }}>{est.range}</strong>.</p>
-                <p style={{ marginTop: 12, fontSize: 13.5, color: "var(--faint)" }}>Esto es una orientación inicial, no una cotización final.</p>
-              </div>
-            ) : null}
-            <p className="k-sub" style={{ marginTop: 28 }}>¿Este nivel de inversión se encuentra dentro de lo que imaginabas?</p>
-            <SingleGrid value={a.investment_response} opts={D.INVESTMENT_RESPONSES} pulse={pulse} onPick={v=>setA("investment_response",v)} />
-            <ContinueBtn onNext={next} ok={!!a.investment_response} label="Ver mi ruta" />
-          </>
-        );
-      }
     }
     return null;
   };
@@ -631,8 +614,6 @@ export default function QuizExperience() {
   const chapter = step?.chapter ?? 0;
   return (
     <>
-      <Sky />
-      <div className="k-veil" aria-hidden />
       {phase === "quiz" && <Route chapter={chapter} />}
 
       <main ref={stageRef} className="k-stage">
@@ -735,18 +716,11 @@ export default function QuizExperience() {
               <div className="k-glass k-block"><div className="lbl">Lo que ya existe</div><p>{result.clientResult.whatAlreadyExists}</p></div>
               <div className="k-glass k-block"><div className="lbl">La oportunidad que vemos</div><p>{result.clientResult.opportunityDetected}</p></div>
               <div className="k-glass k-block"><div className="lbl">La ruta recomendada</div><p>{result.clientResult.recommendedRoute}</p></div>
-              <div className="k-metrics">
-                <div className="k-glass k-metric"><div className="lbl">Inversión aproximada</div>
-                  <div className="v">{result.priceRange}</div>
-                  <p style={{ marginTop: 8, fontSize: 13 }}>{result.clientResult.estimatedInvestment}</p></div>
-                <div className="k-glass k-metric"><div className="lbl">Tiempo estimado</div>
-                  <div className="v">{result.timelineRange}</div>
-                  <p style={{ marginTop: 8, fontSize: 13 }}>{result.clientResult.estimatedTimeline}</p></div>
+              <div className="k-glass k-metric" style={{ marginTop: 26 }}>
+                <div className="lbl">Tiempo estimado</div>
+                <div className="v">{result.timelineRange}</div>
+                <p style={{ marginTop: 8, fontSize: 13 }}>{result.clientResult.estimatedTimeline}</p>
               </div>
-              <div className="k-glass k-block"><div className="lbl">Operación mensual probable</div>
-                <p>{result.clientResult.ongoingCosts}</p>
-                <p style={{ marginTop: 10, fontSize: 13.5, color: "var(--faint)" }}>
-                  {result.monthly.map(m => `${m.label}: ${m.range}`).join(" · ")}</p></div>
               <div className="k-glass k-block"><div className="lbl">Variables pendientes</div><p>{result.clientResult.missingVariables}</p></div>
               <div className="k-glass k-block"><div className="lbl">Antes de despedirnos</div><p>{result.clientResult.emotionalClosing}</p></div>
               <div className="k-ctas">
@@ -798,10 +772,26 @@ export default function QuizExperience() {
 }
 
 /* ── componentes de módulo (identidad estable entre renders) ── */
-function OptBtn({ sel, on, pulse, children }: { sel: boolean; on: () => void; pulse: () => void; children: React.ReactNode }) {
+function OptBtn({
+  sel,
+  on,
+  pulse,
+  children,
+  variant = "default",
+}: {
+  sel: boolean;
+  on: () => void;
+  pulse: () => void;
+  children: React.ReactNode;
+  variant?: "default" | "priority";
+}) {
   const [p, setP] = useState(0);
   return (
-    <button className={`k-opt ${sel ? "sel" : ""}`} onClick={() => { setP(x => x + 1); pulse(); on(); }} aria-pressed={sel}>
+    <button
+      className={`k-opt ${variant === "priority" ? "k-opt-priority" : ""} ${sel ? "sel" : ""}`}
+      onClick={() => { setP(x => x + 1); pulse(); on(); }}
+      aria-pressed={sel}
+    >
       {p > 0 && <span key={p} className="ring" aria-hidden />}
       <span className="dot" aria-hidden /> {children}
     </button>
@@ -809,22 +799,43 @@ function OptBtn({ sel, on, pulse, children }: { sel: boolean; on: () => void; pu
 }
 function SingleGrid({ value, opts, pulse, onPick }: { value?: string; opts: D.Option[]; pulse: () => void; onPick: (v: string) => void }) {
   return (
-    <div className="k-opts duo k-single">
+    <div className="k-opts duo k-single" data-k-incomplete={!value || undefined}>
       {opts.map(o => <OptBtn key={o.id} pulse={pulse} sel={value === o.id} on={() => onPick(o.id)}>{o.label}</OptBtn>)}
     </div>
   );
 }
 function MultiGrid({ selected, opts, pulse, onToggle }: { selected: string[]; opts: D.Option[]; pulse: () => void; onToggle: (v: string) => void }) {
   return (
-    <div className="k-opts duo k-multi">
+    <div className="k-opts duo k-multi" data-k-incomplete={selected.length === 0 || undefined}>
       {opts.map(o => <OptBtn key={o.id} pulse={pulse} sel={selected.includes(o.id)} on={() => onToggle(o.id)}>{o.label}</OptBtn>)}
     </div>
   );
 }
+function focusFirstIncomplete() {
+  const stage = document.querySelector(".k-stage");
+  if (!stage) return;
+  const target = stage.querySelector<HTMLElement>('[data-k-incomplete="true"]');
+  if (!target) return;
+  target.scrollIntoView({ behavior: "smooth", block: "center" });
+  target.classList.add("k-attention");
+  window.setTimeout(() => target.classList.remove("k-attention"), 1600);
+}
 function ContinueBtn({ ok = true, label = "Continuar", onNext }: { ok?: boolean; label?: string; onNext: () => void }) {
   return (
     <div className="k-nav-actions">
-      <button className="k-cta" disabled={!ok} onClick={onNext}><span>{label}</span></button>
+      <button
+        type="button"
+        className={`k-cta ${ok ? "" : "is-waiting"}`}
+        onClick={() => {
+          if (!ok) {
+            focusFirstIncomplete();
+            return;
+          }
+          onNext();
+        }}
+      >
+        <span>{ok ? label : "Completa lo pendiente"}</span>
+      </button>
     </div>
   );
 }

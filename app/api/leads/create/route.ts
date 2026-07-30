@@ -37,22 +37,36 @@ export async function POST(req: Request) {
       });
     }
 
-    await appendLead({
-      lead_id, created_at: now, updated_at: now,
-      status: "Quiz iniciado", completion_percentage: "0", last_step: "lead",
-      project_name: d.project_name, full_name: d.full_name, whatsapp: d.whatsapp,
-      email: d.email, city_state: d.city_state,
-      source_url: d.source_url, utm_source: d.utm_source,
-      utm_medium: d.utm_medium, utm_campaign: d.utm_campaign,
-      terms_accepted_at: now
-    });
+    try {
+      await appendLead({
+        lead_id, created_at: now, updated_at: now,
+        status: "Quiz iniciado", completion_percentage: "0", last_step: "lead",
+        project_name: d.project_name, full_name: d.full_name, whatsapp: d.whatsapp,
+        email: d.email, city_state: d.city_state,
+        source_url: d.source_url, utm_source: d.utm_source,
+        utm_medium: d.utm_medium, utm_campaign: d.utm_campaign,
+        terms_accepted_at: now
+      }, { timeoutMs: 20_000 });
+    } catch (sheetError) {
+      // El registro en Sheets no debe impedir que la persona continúe.
+      console.error("leads/create: fallo al escribir en Sheets", sheetError);
+      return NextResponse.json({
+        ok: true,
+        lead_id,
+        local: true,
+        warning:
+          sheetError instanceof Error
+            ? sheetError.message
+            : "No se pudo escribir en Google Sheets.",
+      });
+    }
+
     return NextResponse.json({ ok: true, lead_id });
   } catch (e) {
     console.error("leads/create", e);
-    const message =
-      e instanceof Error && e.message.includes("Google Sheets")
-        ? e.message
-        : "No pudimos guardar tus datos. Intenta de nuevo.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: "No pudimos guardar tus datos. Intenta de nuevo." },
+      { status: 500 },
+    );
   }
 }

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { QuizModalProvider } from "@/components/ui/QuizModal";
+import { GlobalButtonWave } from "@/components/ui/GlobalButtonWave";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,6 +40,7 @@ export default function RootLayout({
     <html lang="es" className={inter.variable} suppressHydrationWarning>
       <body className="min-h-screen antialiased font-sans" suppressHydrationWarning>
         <QuizModalProvider>
+          <GlobalButtonWave />
           <Navbar />
           <main className="pb-24 md:pb-0">{children}</main>
           <Footer />

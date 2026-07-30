@@ -23,7 +23,7 @@ export type Row = Partial<Record<(typeof COLUMNS)[number], string>>;
 
 const SHEET = "Leads";
 
-export function sheetsConfigured(): boolean {
+function serviceAccountConfigured(): boolean {
   const email =
     process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
     process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
@@ -32,6 +32,56 @@ export function sheetsConfigured(): boolean {
   const id =
     process.env.GOOGLE_SHEETS_SPREADSHEET_ID || process.env.GOOGLE_SHEET_ID;
   return Boolean(email?.trim() && key?.trim() && id?.trim());
+}
+
+function webAppConfigured(): boolean {
+  return Boolean(process.env.GOOGLE_SHEETS_WEBAPP_URL?.trim());
+}
+
+export function sheetsConfigured(): boolean {
+  return serviceAccountConfigured() || webAppConfigured();
+}
+
+async function callWebApp(
+  action: "quiz_create" | "quiz_update" | "quiz_get",
+  payload: Record<string, unknown>,
+  timeoutMs = 8000,
+) {
+  const url = process.env.GOOGLE_SHEETS_WEBAPP_URL;
+  if (!url) throw new Error("Falta GOOGLE_SHEETS_WEBAPP_URL.");
+
+  // Apps Script puede tardar o no responder: nunca debe bloquear el funnel.
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, ...payload }),
+    redirect: "follow",
+    cache: "no-store",
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  const text = await response.text();
+  let data: {
+    ok?: boolean;
+    error?: string;
+    integration?: string;
+    found?: boolean;
+    row?: Row;
+  } = {};
+  try {
+    data = JSON.parse(text);
+  } catch {}
+
+  if (!response.ok || data.error) {
+    throw new Error(
+      data.error || `Google Sheets respondió con error ${response.status}.`,
+    );
+  }
+  if (data.integration !== "komvos-quiz-v2") {
+    throw new Error(
+      "El Apps Script de Google Sheets todavía no está actualizado para recibir el quiz.",
+    );
+  }
+  return data;
 }
 
 function client() {
@@ -75,7 +125,14 @@ async function ensureHeader() {
   }
 }
 
-export async function appendLead(row: Row): Promise<void> {
+export async function appendLead(
+  row: Row,
+  options: { timeoutMs?: number } = {},
+): Promise<void> {
+  if (!serviceAccountConfigured() && webAppConfigured()) {
+    await callWebApp("quiz_create", { row }, options.timeoutMs);
+    return;
+  }
   await ensureHeader();
   const { api, id } = client();
   const values = COLUMNS.map(c => row[c] ?? "");
@@ -97,7 +154,19 @@ async function findRowIndex(leadId: string): Promise<number | null> {
 }
 
 /* Actualiza solo las columnas presentes en patch, sin tocar las demás. */
-export async function updateLead(leadId: string, patch: Row): Promise<boolean> {
+export async function updateLead(
+  leadId: string,
+  patch: Row,
+  options: { timeoutMs?: number } = {},
+): Promise<boolean> {
+  if (!serviceAccountConfigured() && webAppConfigured()) {
+    const data = await callWebApp(
+      "quiz_update",
+      { lead_id: leadId, patch },
+      options.timeoutMs,
+    );
+    return data.found !== false;
+  }
   const rowIndex = await findRowIndex(leadId);
   if (!rowIndex) return false;
   const { api, id } = client();
@@ -117,6 +186,10 @@ export async function updateLead(leadId: string, patch: Row): Promise<boolean> {
 }
 
 export async function getLead(leadId: string): Promise<Row | null> {
+  if (!serviceAccountConfigured() && webAppConfigured()) {
+    const data = await callWebApp("quiz_get", { lead_id: leadId });
+    return data.found === false ? null : data.row || null;
+  }
   const rowIndex = await findRowIndex(leadId);
   if (!rowIndex) return null;
   const { api, id } = client();

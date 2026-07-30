@@ -72,7 +72,7 @@ export function QuizModalProvider({ children }: PropsWithChildren) {
             <button
               type="button"
               aria-label="Cerrar evaluación"
-              className="absolute inset-0 bg-black/75 backdrop-blur-md"
+              className="absolute inset-0 bg-black"
               onClick={closeQuiz}
             />
             <motion.div
@@ -83,7 +83,7 @@ export function QuizModalProvider({ children }: PropsWithChildren) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.35, ease: [0.19, 1, 0.22, 1] }}
-              className="relative z-10 w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-slate-950/90 shadow-[0_30px_120px_rgba(0,0,0,0.65)] backdrop-blur-2xl"
+              className="relative z-10 w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_30px_120px_rgba(0,0,0,0.65)]"
             >
               <button
                 type="button"

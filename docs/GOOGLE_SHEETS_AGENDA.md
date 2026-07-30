@@ -1,6 +1,6 @@
-# Configurar Google Sheets para la encuesta "Agendar llamada"
+# Configurar Google Sheets para Agenda y Quiz
 
-Las respuestas del formulario "Agendar llamada" se envían a tu Google Sheet mediante un **Web App** de Google Apps Script. **No hace falta compartir tu correo**: todo se hace en tu cuenta de Google y luego pegas una URL en el proyecto.
+Las respuestas de "Agendar llamada" y del quiz se envían al mismo archivo de Google Sheets mediante un **Web App** de Google Apps Script. La pestaña `Agenda` se conserva y el script crea automáticamente otra pestaña llamada `Quiz Leads`.
 
 Tu hoja: [Agenda - Google Sheets](https://docs.google.com/spreadsheets/d/15139Gz9m1dMfoUTVu1mHjPDcjgn0QIGiTV_TVIPDenw/edit?usp=sharing)
 
@@ -23,43 +23,10 @@ Tu hoja: [Agenda - Google Sheets](https://docs.google.com/spreadsheets/d/15139Gz
 
 ---
 
-## 2. Crear el script que recibe los datos
+## 2. Actualizar el script que recibe los datos
 
 1. En esa misma hoja "Agenda", menú **Extensiones → Apps Script**.
-2. Se abre el editor. Borra el código que venga y pega **todo** el código del archivo `docs/agenda-webapp-code.js` de este proyecto (o el bloque que ves abajo):
-
-```javascript
-function doPost(e) {
-  try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var body = e.postData ? JSON.parse(e.postData.contents) : {};
-    var nombre = body.nombre || "";
-    var whatsapp = body.whatsapp || "";
-    var tipo_negocio = body.tipo_negocio || "";
-    var mejorar = body.mejorar || "";
-    var presupuesto = body.presupuesto || "";
-    var fecha_hora = body.fecha_hora || "";
-
-    sheet.appendRow([
-      new Date(),
-      nombre,
-      whatsapp,
-      tipo_negocio,
-      mejorar,
-      presupuesto,
-      fecha_hora
-    ]);
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: true }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ error: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-```
+2. Se abre el editor. Borra el código anterior y pega **todo** el contenido actualizado de `docs/agenda-webapp-code.js`.
 
 3. **Guarda** el proyecto (Ctrl+S o el icono de disco). Ponle nombre al proyecto si quieres, por ejemplo: **"Agenda Web App"**.
 
@@ -67,7 +34,9 @@ function doPost(e) {
 
 ## 3. Desplegar como Web App
 
-1. En Apps Script, menú **Implementar → Nueva implementación**.
+1. En Apps Script:
+   - Si ya existe la aplicación web: **Implementar → Administrar implementaciones → Editar (lápiz) → Nueva versión → Implementar**.
+   - Si no existe: **Implementar → Nueva implementación**.
 2. Tipo: **Aplicación web**.
 3. Configuración:
    - **Descripción**: por ejemplo "Agenda llamadas".
@@ -101,7 +70,9 @@ function doPost(e) {
 
 1. En tu web, haz clic en **"Agendar llamada"**.
 2. Rellena el formulario y envía.
-3. Revisa la Google Sheet: debe aparecer una **nueva fila** con la fecha/hora de envío y los datos (nombre, WhatsApp, tipo de negocio, etc.).
+3. Revisa la Google Sheet:
+   - Agenda crea una fila nueva en la pestaña `Agenda`.
+   - El quiz crea una fila en `Quiz Leads`, con `Fecha y hora de registro`, y actualiza esa misma fila conforme la persona avanza.
 
 Si no llega nada:
 - Comprueba que la URL en `.env.local` es exactamente la de **Implementar → Implementaciones** (incluido `/exec` al final).
@@ -119,4 +90,4 @@ Si no llega nada:
 | Proyecto | `.env.local`: `GOOGLE_SHEETS_WEBAPP_URL=URL_copiada`. |
 | Vercel | Añadir la misma variable en Environment Variables. |
 
-Con esto, cada envío del formulario "Agendar llamada" quedará registrado en tu Google Sheet.
+Con esto, cada agenda y cada quiz quedarán registrados en el mismo archivo de Google Sheets.

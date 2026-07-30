@@ -183,9 +183,57 @@ body {
   letter-spacing: var(--tracking-normal);
 }
 
+/* Pulso del quiz aplicado globalmente sin modificar el estilo del botón. */
+.global-button-wave-host {
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.global-button-wave-positioned {
+  position: relative;
+}
+
+.global-button-wave {
+  position: absolute;
+  z-index: 20;
+  left: var(--wave-x);
+  top: var(--wave-y);
+  width: var(--wave-size);
+  height: var(--wave-size);
+  border: 1px solid rgba(6, 182, 212, 0.85);
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(6, 182, 212, 0.24) 0%,
+    rgba(99, 102, 241, 0.12) 42%,
+    transparent 70%
+  );
+  box-shadow:
+    0 0 22px rgba(6, 182, 212, 0.2),
+    inset 0 0 18px rgba(99, 102, 241, 0.12);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.05);
+  animation: globalButtonWave 0.8s ease-out forwards;
+}
+
+@keyframes globalButtonWave {
+  0% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .global-button-wave {
+    animation-duration: 0.01ms;
   }
 }
 
