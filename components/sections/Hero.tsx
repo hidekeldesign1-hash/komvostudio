@@ -2,10 +2,10 @@
 
 import { forwardRef } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { HeroCanvas } from "@/components/HeroCanvas";
 import { useQuizModal } from "@/components/ui/QuizModal";
+import { useBookingModal } from "@/components/ui/BookingModal";
 
 type HeroProps = {
   canvasPaused?: boolean;
@@ -16,6 +16,7 @@ export const Hero = forwardRef<HTMLElement, HeroProps>(function Hero(
   ref,
 ) {
   const { openQuiz } = useQuizModal();
+  const { openBooking } = useBookingModal();
 
   return (
     <section
@@ -83,12 +84,13 @@ export const Hero = forwardRef<HTMLElement, HeroProps>(function Hero(
               </button>
             </motion.div>
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="#portfolio"
+              <button
+                type="button"
+                onClick={openBooking}
                 className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:border-cyan-400/70 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 sm:w-auto sm:text-base"
               >
-                Ver evidencia de trabajo
-              </Link>
+                Agendar llamada
+              </button>
             </motion.div>
           </motion.div>
 

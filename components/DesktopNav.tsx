@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { NavItem } from "@/components/MobileBottomNav";
 import { SoundToggle } from "@/components/ui/SoundToggle";
-import { useQuizModal } from "@/components/ui/QuizModal";
+import { useBookingModal } from "@/components/ui/BookingModal";
 
 type DesktopNavProps = {
   items: NavItem[];
@@ -17,7 +17,7 @@ export function DesktopNav({
   activeIndex,
   onSelect,
 }: DesktopNavProps) {
-  const { openQuiz } = useQuizModal();
+  const { openBooking } = useBookingModal();
   const navigationItems = items.slice(0, -1);
   const contactItem = items.at(-1);
 
@@ -74,7 +74,7 @@ export function DesktopNav({
       {contactItem && (
         <button
           type="button"
-          onClick={openQuiz}
+          onClick={openBooking}
           className="whitespace-nowrap rounded-full bg-white px-5 py-2.5 text-xs font-medium text-slate-950 transition-colors hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 lg:text-sm"
         >
           Hablemos

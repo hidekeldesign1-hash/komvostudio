@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { QuizModalProvider } from "@/components/ui/QuizModal";
+import { BookingModalProvider } from "@/components/ui/BookingModal";
 import { GlobalButtonWave } from "@/components/ui/GlobalButtonWave";
 
 const inter = Inter({
@@ -40,10 +41,12 @@ export default function RootLayout({
     <html lang="es" className={inter.variable} suppressHydrationWarning>
       <body className="min-h-screen antialiased font-sans" suppressHydrationWarning>
         <QuizModalProvider>
-          <GlobalButtonWave />
-          <Navbar />
-          <main className="pb-24 md:pb-0">{children}</main>
-          <Footer />
+          <BookingModalProvider>
+            <GlobalButtonWave />
+            <Navbar />
+            <main className="pb-24 md:pb-0">{children}</main>
+            <Footer />
+          </BookingModalProvider>
         </QuizModalProvider>
       </body>
     </html>

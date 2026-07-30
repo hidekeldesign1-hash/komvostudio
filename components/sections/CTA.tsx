@@ -4,6 +4,7 @@ import { forwardRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PulseButton } from "@/components/ui/PulseButton";
 import { useQuizModal } from "@/components/ui/QuizModal";
+import { useBookingModal } from "@/components/ui/BookingModal";
 
 const BULLETS = [
   "Diseño claro",
@@ -26,6 +27,7 @@ const BULLET_DURATION_MS = 3200;
 export const CTA = forwardRef<HTMLElement>(function CTA(_, ref) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { openQuiz } = useQuizModal();
+  const { openBooking } = useBookingModal();
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -73,7 +75,7 @@ export const CTA = forwardRef<HTMLElement>(function CTA(_, ref) {
           </button>
           <PulseButton
             type="button"
-            onClick={openQuiz}
+            onClick={openBooking}
             className="flex min-h-[48px] items-center justify-center px-6 py-3.5 text-base font-medium sm:min-h-0 sm:px-8 sm:py-4"
           >
             Agendar llamada

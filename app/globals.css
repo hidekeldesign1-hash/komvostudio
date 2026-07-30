@@ -183,23 +183,28 @@ body {
   letter-spacing: var(--tracking-normal);
 }
 
-/* Pulso del quiz aplicado globalmente sin modificar el estilo del botón. */
-.global-button-wave-host {
-  isolation: isolate;
-  overflow: hidden;
+/* En móvil el resaltado nativo se ve como una sombra oscura sobre los botones. */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
 }
 
-.global-button-wave-positioned {
-  position: relative;
+/* Pulso del quiz aplicado globalmente sin modificar el estilo del botón. */
+.global-button-wave-clip {
+  position: fixed;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2147483000;
 }
 
 .global-button-wave {
   position: absolute;
-  z-index: 20;
-  left: var(--wave-x);
-  top: var(--wave-y);
-  width: var(--wave-size);
-  height: var(--wave-size);
+  left: 0;
+  top: 0;
   border: 1px solid rgba(6, 182, 212, 0.85);
   border-radius: 9999px;
   background: radial-gradient(

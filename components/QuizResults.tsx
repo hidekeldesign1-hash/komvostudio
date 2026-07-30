@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { PulseButton } from "@/components/ui/PulseButton";
+import { useBookingModal } from "@/components/ui/BookingModal";
 
 export type SimplifiedQuizAnswers = {
   category?: string;
@@ -63,6 +64,7 @@ export function QuizResults({
   answers: SimplifiedQuizAnswers;
   onBack?: () => void;
 }) {
+  const { openBooking } = useBookingModal();
   const selectedGoals = answers.selected_goals?.length
     ? answers.selected_goals
     : answers.main_goal
@@ -90,9 +92,6 @@ export function QuizResults({
     `Hola, soy ${fullName}. Completé mi diagnóstico para ${projectName}.\n\n${summary}\n\nQuiero revisar esta ruta con KOMVOS.`,
   )}`;
 
-  const openBooking = () => {
-    window.open(process.env.NEXT_PUBLIC_BOOKING_URL || whatsappHref, "_blank", "noopener,noreferrer");
-  };
   const openWhatsApp = () => {
     window.open(whatsappHref, "_blank", "noopener,noreferrer");
   };

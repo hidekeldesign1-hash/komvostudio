@@ -1,12 +1,16 @@
+"use client";
+
+import { useBookingModal } from "@/components/ui/BookingModal";
+
 const FACEBOOK_URL = "https://www.facebook.com/share/17q76MhVy4/?mibextid=wwXIfr";
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const { openBooking } = useBookingModal();
 
   return (
     <footer className="border-t border-border bg-black py-8 sm:py-10">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        {/* Redes sociales: arriba de el último texto, abajo de bullets y línea */}
         <div className="flex justify-center pb-6 sm:pb-8">
           <a
             href={FACEBOOK_URL}
@@ -29,17 +33,18 @@ export function Footer() {
           <p className="text-xs text-foreground sm:text-sm" suppressHydrationWarning>
             © {year} Komvos Marketing Studio. Todos los derechos reservados.
           </p>
-          <div className="flex gap-6 text-xs text-foreground sm:gap-8 sm:text-sm">
-            <a
-              href="#"
-              className="transition-colors hover:text-foreground"
+          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-foreground sm:gap-8 sm:text-sm">
+            <button
+              type="button"
+              onClick={openBooking}
+              className="transition-colors hover:text-cyan-300"
             >
+              Agendar llamada
+            </button>
+            <a href="#" className="transition-colors hover:text-foreground">
               Privacidad
             </a>
-            <a
-              href="#"
-              className="transition-colors hover:text-foreground"
-            >
+            <a href="#" className="transition-colors hover:text-foreground">
               Términos
             </a>
           </div>
