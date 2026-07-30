@@ -310,7 +310,7 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
         if (isExiting) onComplete();
       }}
       onClick={requestExit}
-      className="fixed inset-0 z-[100] flex w-screen max-w-none cursor-pointer items-center justify-center overflow-hidden bg-[#050505]"
+      className="fixed inset-0 z-[100] flex w-screen max-w-none cursor-pointer items-center justify-center overflow-hidden bg-black"
     >
       <motion.canvas
         ref={canvasRef}
@@ -321,7 +321,7 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.08),transparent_42%),radial-gradient(circle_at_70%_40%,rgba(99,102,241,0.08),transparent_36%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.08),transparent_42%),radial-gradient(circle_at_70%_40%,rgba(37,99,235,0.07),transparent_36%)]"
         aria-hidden
       />
 

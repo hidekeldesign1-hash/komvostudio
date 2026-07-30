@@ -21,9 +21,9 @@ export function SystemDiagram() {
     activeNode === null || Math.abs(index - activeNode) <= 1;
 
   return (
-    <section className="relative overflow-hidden border-t border-white/10 bg-[#050505] py-20 text-white sm:py-24 lg:py-32">
+    <section className="relative overflow-hidden border-t border-white/10 bg-black py-20 text-white sm:py-24 lg:py-32">
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_42%_50%,rgba(6,182,212,0.1),transparent_38%),radial-gradient(circle_at_68%_50%,rgba(99,102,241,0.1),transparent_40%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_42%_50%,rgba(6,182,212,0.1),transparent_38%),radial-gradient(circle_at_68%_50%,rgba(37,99,235,0.09),transparent_40%)]"
         aria-hidden
       />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

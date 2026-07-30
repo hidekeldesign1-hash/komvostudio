@@ -2,9 +2,8 @@
 
 import { forwardRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import { AgendaModal } from "@/components/ui/AgendaModal";
 import { PulseButton } from "@/components/ui/PulseButton";
+import { useQuizModal } from "@/components/ui/QuizModal";
 
 const BULLETS = [
   "Diseño claro",
@@ -24,13 +23,9 @@ const BULLETS = [
 
 const BULLET_DURATION_MS = 3200;
 
-/** Número de WhatsApp Business: código de país + número sin espacios (ej: 5215512345678) */
-const WHATSAPP_NUMBER = "525532584558";
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
-
 export const CTA = forwardRef<HTMLElement>(function CTA(_, ref) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [agendaOpen, setAgendaOpen] = useState(false);
+  const { openQuiz } = useQuizModal();
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -43,7 +38,7 @@ export const CTA = forwardRef<HTMLElement>(function CTA(_, ref) {
     <section
       id="contacto"
       ref={ref}
-      className="relative scroll-mt-20 border-t border-border bg-[linear-gradient(to_top,rgba(0,0,0,0.03)_0%,transparent_40%)] dark:bg-[linear-gradient(to_top,rgba(255,255,255,0.04)_0%,transparent_40%)] py-16 sm:scroll-mt-24 sm:py-24 md:py-28 lg:py-32"
+      className="relative scroll-mt-20 border-t border-border bg-black py-16 sm:scroll-mt-24 sm:py-24 md:py-28 lg:py-32"
     >
       {/* Separador: doble línea sutil */}
       <div className="absolute left-0 right-0 top-0 flex flex-col gap-1" aria-hidden>
@@ -52,7 +47,7 @@ export const CTA = forwardRef<HTMLElement>(function CTA(_, ref) {
       </div>
       {/* Fondo de profundidad inferior */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[60%] bg-gradient-to-t from-surface/40 to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[60%] bg-gradient-to-t from-cyan-950/10 to-transparent"
         aria-hidden
       />
       <motion.div
@@ -69,22 +64,20 @@ export const CTA = forwardRef<HTMLElement>(function CTA(_, ref) {
           Cuéntanos tu idea y te diremos cómo podemos ayudarte.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:mt-12 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
-          <Link
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={openQuiz}
             className="flex min-h-[48px] items-center justify-center rounded-full bg-gradient-to-r from-cyan-500 to-indigo-600 px-6 py-3.5 text-base font-medium text-white shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 sm:min-h-0 sm:px-8 sm:py-4"
           >
             Quiero empezar
-          </Link>
+          </button>
           <PulseButton
             type="button"
-            onClick={() => setAgendaOpen(true)}
+            onClick={openQuiz}
             className="flex min-h-[48px] items-center justify-center px-6 py-3.5 text-base font-medium sm:min-h-0 sm:px-8 sm:py-4"
           >
             Agendar llamada
           </PulseButton>
-            <AgendaModal open={agendaOpen} onClose={() => setAgendaOpen(false)} />
         </div>
         <p className="mt-8 text-sm text-foreground sm:mt-10">
           Te respondemos pronto.

@@ -150,6 +150,28 @@
   }
 }
 
+/* Lienzo global Komvos: negro puro en cualquier preferencia del sistema. */
+:root {
+  --background: #000000;
+  --foreground: #f5f7ff;
+  --foreground-secondary: #cbd5e1;
+  --card: #050505;
+  --card-foreground: #f5f7ff;
+  --popover: #050505;
+  --popover-foreground: #f5f7ff;
+  --muted: #0a0a0a;
+  --muted-foreground: #94a3b8;
+  --muted-soft: #64748b;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(56, 189, 248, 0.24);
+  --input: #0a0a0a;
+  --surface: rgba(2, 6, 23, 0.62);
+  --surface-elevated: rgba(5, 10, 24, 0.94);
+  --sidebar: #000000;
+  --sidebar-foreground: #f5f7ff;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+}
+
 html {
   scroll-behavior: smooth;
 }

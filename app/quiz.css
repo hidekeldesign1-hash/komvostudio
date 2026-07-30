@@ -1,0 +1,280 @@
+/* KOMVOS Quiz — estilos aislados para el modal */
+.quiz-shell {
+  --void:#000000;
+  --ink:#050505;
+  --glass:rgba(2,6,23,.62);
+  --glass-2:rgba(5,10,24,.78);
+  --line:rgba(255,255,255,.14);
+  --line-soft:rgba(255,255,255,.1);
+  --text:#f5f7ff;
+  --dim:#cbd5e1;
+  --faint:#64748b;
+  --cyan:#06b6d4;
+  --indigo:#6366f1;
+  --accent-glow:rgba(6,182,212,.3);
+  --spectral:linear-gradient(120deg,#06b6d4 0%,#22d3ee 42%,#6366f1 100%);
+  --spectral-soft:linear-gradient(120deg,rgba(6,182,212,.55),rgba(34,211,238,.4),rgba(99,102,241,.55));
+  --r-lg:26px; --r-md:18px; --r-sm:12px;
+  --font-display: var(--font-sans), system-ui, sans-serif;
+  --font-body: var(--font-sans), system-ui, sans-serif;
+  position: relative;
+  height: min(88vh, 920px);
+  overflow: hidden;
+  color: var(--text);
+  background:
+    radial-gradient(90% 70% at 50% 0%, rgba(6,182,212,.08), transparent 58%),
+    radial-gradient(70% 60% at 88% 92%, rgba(99,102,241,.08), transparent 62%),
+    #000;
+  border-radius: 1.5rem;
+}
+.quiz-shell button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.quiz-shell input,.quiz-shell textarea,.quiz-shell select{font-family:inherit;color:var(--text)}
+.quiz-shell .k-sky,
+.quiz-shell .k-veil,
+.quiz-shell .k-route,
+.quiz-shell .k-chapter,
+.quiz-shell .k-tools,
+.quiz-shell .k-drawer {
+  position: absolute;
+}
+.quiz-shell .k-stage {
+  min-height: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 88px 22px 72px;
+  justify-content: flex-start;
+  scroll-padding-top: 92px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+/* Sin centrado vertical: con márgenes automáticos el inicio del contenido
+   queda fuera de alcance cuando la escena es más alta que el contenedor. */
+.quiz-shell .k-scene,
+.quiz-shell .k-result {
+  margin-top: 0;
+  margin-bottom: 0;
+  flex: 0 0 auto;
+}
+.quiz-shell .k-tools {
+  right: 14px;
+  bottom: 14px;
+}
+/* ============================================================
+   KOMVOS · El Pulso — sistema visual
+   Fondo espacial, liquid glass, luz espectral. Sin color de
+   marca fijo: el acento es un fenómeno de luz refractada.
+   ============================================================ */
+
+/* ── lienzo espacial ── */
+.k-sky{position:fixed;inset:0;z-index:0;pointer-events:none}
+.k-veil{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(90% 70% at 50% 0%,rgba(6,182,212,.07),transparent 60%),
+    radial-gradient(70% 60% at 85% 90%,rgba(99,102,241,.06),transparent 65%),
+    radial-gradient(60% 50% at 10% 75%,rgba(34,211,238,.04),transparent 60%)}
+
+/* ── escenario ── */
+.k-stage{position:relative;z-index:3;min-height:100dvh;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:96px 22px 60px}
+.k-scene{width:100%;max-width:720px}
+
+/* ── ruta de nodos (capítulos) ── */
+.k-route{position:fixed;top:0;left:0;right:0;z-index:5;
+  display:flex;align-items:center;justify-content:center;gap:0;
+  padding:20px 16px 14px;
+  background:linear-gradient(180deg,rgba(5,6,11,.85),rgba(5,6,11,0));
+  backdrop-filter:blur(6px)}
+.k-node{width:9px;height:9px;border-radius:50%;flex:none;position:relative;
+  background:rgba(255,255,255,.14);transition:all .5s ease}
+.k-node.lit{background:#fff;box-shadow:0 0 12px rgba(6,182,212,.9),0 0 26px rgba(99,102,241,.45)}
+.k-node.now{transform:scale(1.35)}
+.k-link{width:34px;height:1px;background:rgba(255,255,255,.1);transition:background .5s}
+.k-link.lit{background:linear-gradient(90deg,rgba(6,182,212,.7),rgba(99,102,241,.7))}
+.k-chapter{position:fixed;top:44px;left:0;right:0;z-index:5;text-align:center;
+  font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
+
+/* ── tipografía ── */
+.k-display{font-family:var(--font-display),sans-serif;font-weight:500;
+  font-size:clamp(30px,5vw,46px);line-height:1.12;letter-spacing:-.01em}
+.k-sub{margin-top:18px;font-size:17px;line-height:1.7;color:var(--dim);max-width:56ch}
+.k-eyebrow{font-size:11.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--faint);margin-bottom:16px}
+
+/* ── liquid glass ── */
+.k-glass{position:relative;border-radius:var(--r-lg);
+  background:linear-gradient(160deg,rgba(2,6,23,.78),rgba(5,10,24,.55));
+  border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(18px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 24px -8px var(--accent-glow),0 30px 60px -30px rgba(0,0,0,.8)}
+.k-glass::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:var(--spectral-soft);opacity:.22;pointer-events:none;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude}
+
+/* ── opciones ── */
+.k-opts{display:grid;gap:12px;margin-top:30px}
+.k-opts.duo{grid-template-columns:1fr 1fr}
+.k-opt{position:relative;display:flex;align-items:center;gap:14px;text-align:left;
+  padding:16px 20px;border-radius:var(--r-md);
+  min-height:56px;background:var(--glass);border:1px solid rgba(255,255,255,.13);
+  font-size:15.5px;font-weight:300;line-height:1.45;color:var(--text);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+  transition:border-color .3s,background .3s,transform .3s,box-shadow .3s;overflow:hidden}
+.k-opt:hover{border-color:rgba(6,182,212,.38);background:var(--glass-2);transform:translateY(-1px);
+  box-shadow:0 0 18px -8px rgba(6,182,212,.32)}
+.k-opt:focus-visible{outline:2px solid rgba(6,182,212,.75);outline-offset:2px}
+.k-opt .dot{width:9px;height:9px;border-radius:50%;flex:none;
+  border:1px solid rgba(255,255,255,.35);transition:all .3s}
+.k-opt.sel{border-color:rgba(6,182,212,.45);background:rgba(6,182,212,.08)}
+.k-opt.sel::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:var(--spectral);opacity:.85;pointer-events:none;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude}
+.k-opt.sel .dot{background:#fff;border-color:#fff;
+  box-shadow:0 0 10px rgba(6,182,212,.9),0 0 22px rgba(99,102,241,.55)}
+/* el pulso: un anillo de luz que se expande al seleccionar */
+.k-opt .ring{position:absolute;left:22px;top:50%;width:10px;height:10px;
+  border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;
+  border:1px solid rgba(6,182,212,.85);
+  animation:kPulse .8s ease-out forwards}
+@keyframes kPulse{
+  0%{opacity:.9;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(22)}
+}
+
+/* ── botones ── */
+.k-cta{position:relative;display:inline-flex;align-items:center;gap:12px;
+  margin-top:34px;padding:18px 40px;border-radius:999px;
+  font-family:var(--font-display),sans-serif;font-weight:600;font-size:15px;letter-spacing:.04em;
+  color:#fff;background:linear-gradient(90deg,#06b6d4,#4f46e5);
+  box-shadow:0 0 20px rgba(6,182,212,.3);transition:transform .3s,box-shadow .3s,opacity .3s}
+.k-cta:hover{transform:translateY(-2px);opacity:.92;
+  box-shadow:0 0 28px rgba(6,182,212,.38),0 18px 50px -12px rgba(99,102,241,.35)}
+.k-cta:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.k-nav-actions{position:relative;z-index:4;margin-top:8px;padding:0 0 4px;text-align:center}
+.k-nav-actions .k-cta{min-width:190px}
+.k-back{display:inline-flex;align-items:center;gap:9px;margin:0 0 24px;padding:10px 14px;
+  border-radius:999px!important;border:1px solid rgba(255,255,255,.12)!important;
+  background:rgba(2,6,23,.7)!important;color:var(--dim)!important;
+  font-size:12px;letter-spacing:.05em;transition:border-color .25s,color .25s,background .25s!important}
+.k-back:hover{border-color:rgba(6,182,212,.4)!important;color:#fff!important;
+  background:rgba(6,182,212,.08)!important}
+.k-back:focus-visible{outline:2px solid rgba(6,182,212,.75);outline-offset:2px}
+.k-ghost{margin-top:18px;padding:16px 34px;border-radius:999px;border:1px solid rgba(255,255,255,.15);
+  font-size:14px;letter-spacing:.08em;color:var(--dim);transition:all .3s}
+.k-ghost:hover{color:var(--text);border-color:rgba(6,182,212,.45);background:rgba(6,182,212,.08)}
+.k-linklike{margin-top:26px;font-size:13px;letter-spacing:.06em;color:var(--faint);
+  text-decoration:underline;text-underline-offset:4px;transition:color .3s}
+.k-linklike:hover{color:var(--dim)}
+
+/* ── campos ── */
+.k-fields{display:grid;gap:14px;margin-top:28px}
+.k-fields label{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:8px}
+.k-fields input,.k-fields textarea{width:100%;padding:15px 18px;border-radius:var(--r-sm);
+  background:rgba(2,6,23,.72);border:1px solid rgba(255,255,255,.1);font-size:15.5px;
+  transition:border-color .3s,background .3s,box-shadow .3s}
+.k-fields input:focus,.k-fields textarea:focus{outline:none;border-color:rgba(6,182,212,.55);
+  background:rgba(5,10,24,.9);box-shadow:0 0 0 3px rgba(6,182,212,.15)}
+.k-fields input::placeholder,.k-fields textarea::placeholder{color:var(--faint)}
+.k-fields .err{border-color:rgba(255,140,150,.6)}
+.k-errmsg{margin-top:14px;font-size:13px;color:rgba(255,160,168,.9);display:none}
+.k-errmsg.on{display:block}
+.k-consent{display:flex;gap:12px;align-items:flex-start;margin-top:8px;
+  font-size:13.5px;line-height:1.6;color:var(--dim);text-align:left}
+.k-consent input{width:18px;height:18px;margin-top:2px;flex:none;accent-color:#06b6d4}
+.k-phone{display:grid;grid-template-columns:110px 1fr;gap:10px}
+.hp{position:absolute;left:-5000px;opacity:0;height:0;overflow:hidden}
+
+/* ── retroalimentación contextual ── */
+.k-feedback{margin-top:22px;padding:16px 20px;border-radius:var(--r-md);
+  border-left:2px solid transparent;background:rgba(2,6,23,.55);
+  border-image:linear-gradient(180deg,#06b6d4,#6366f1) 1;
+  font-size:14.5px;line-height:1.65;color:var(--dim)}
+
+/* ── coordenada descubierta ── */
+.k-coord{text-align:center;padding:30px 10px}
+.k-coord .tag{font-size:11px;letter-spacing:.4em;text-transform:uppercase;
+  background:var(--spectral);-webkit-background-clip:text;background-clip:text;color:transparent}
+.k-coord p{margin-top:16px;font-family:var(--font-display),sans-serif;font-weight:400;
+  font-size:clamp(19px,2.6vw,24px);line-height:1.5}
+
+/* ── órbitas (paso 5) ── */
+.k-orbit{margin:26px auto 0;display:block}
+.k-orbit .ring{fill:none;stroke:rgba(255,255,255,.08)}
+.k-orbit .core{fill:rgba(255,255,255,.06);stroke:rgba(255,255,255,.25)}
+.k-orbit text{fill:var(--faint);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  font-family:var(--font-body),sans-serif}
+.k-orbit .onode{fill:rgba(255,255,255,.12);transition:all .5s}
+.k-orbit .onode.lit{fill:#fff;filter:drop-shadow(0 0 6px rgba(6,182,212,.9))}
+
+/* ── transiciones narrativas ── */
+.k-transition{text-align:center}
+.k-transition p{font-family:var(--font-display),sans-serif;font-weight:400;
+  font-size:clamp(22px,3.4vw,30px);line-height:1.5;max-width:20ch;margin:26px auto 0}
+
+/* ── resultado ── */
+.k-result{max-width:760px;width:100%}
+.k-result .top{text-align:center;font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--faint)}
+.k-result h1{margin-top:18px;text-align:center}
+.k-block{margin-top:26px;padding:28px 30px}
+.k-block .lbl{font-size:11px;letter-spacing:.3em;text-transform:uppercase;margin-bottom:14px;
+  background:var(--spectral);-webkit-background-clip:text;background-clip:text;color:transparent}
+.k-block p{font-size:15.5px;line-height:1.8;color:var(--dim);white-space:pre-line}
+.k-metrics{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
+.k-metric{padding:22px;text-align:center}
+.k-metric .v{font-family:var(--font-display),sans-serif;font-size:19px;font-weight:500;margin-top:8px}
+.k-ctas{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:36px}
+.k-closing{margin-top:40px;text-align:center;font-family:var(--font-display),sans-serif;
+  font-size:17px;color:var(--dim);letter-spacing:.04em}
+
+/* ── panel legal / drawer ── */
+.k-drawer{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+  padding:22px;background:rgba(3,4,8,.7);backdrop-filter:blur(8px)}
+.k-drawer .panel{max-width:640px;max-height:84vh;overflow:auto;padding:34px 34px 28px}
+.k-drawer h2{font-family:var(--font-display),sans-serif;font-weight:500;font-size:22px}
+.k-drawer h3{margin-top:22px;font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;
+  background:var(--spectral);-webkit-background-clip:text;background-clip:text;color:transparent}
+.k-drawer p{margin-top:10px;font-size:14.5px;line-height:1.75;color:var(--dim)}
+
+/* ── controles fijos ── */
+.k-tools{position:fixed;right:18px;bottom:18px;z-index:50;display:flex;gap:10px}
+.k-tool{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:var(--glass);border:1px solid var(--line-soft);color:var(--dim);transition:all .3s}
+.k-tool:hover{color:var(--text);border-color:var(--line)}
+
+.k-analyzing{text-align:center}
+.k-spinner{width:74px;height:74px;margin:0 auto 26px;border-radius:50%;position:relative}
+.k-spinner::before{content:'';position:absolute;inset:0;border-radius:50%;padding:1.5px;
+  background:conic-gradient(from 0deg,#06b6d4,#22d3ee,#6366f1,#4f46e5,#06b6d4);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  animation:kSpin 2.6s linear infinite}
+@keyframes kSpin{to{transform:rotate(360deg)}}
+
+@media (max-width:640px){
+  .quiz-shell{height:min(92dvh,920px);border-radius:20px}
+  .quiz-shell .k-stage{padding:96px 16px 104px;scroll-padding-top:96px}
+  .k-display{font-size:clamp(28px,9vw,38px);line-height:1.14}
+  .k-sub{font-size:15px;line-height:1.6}
+  .k-opts.duo{grid-template-columns:1fr}
+  .k-opts{gap:10px;margin-top:22px}
+  .k-opt{min-height:58px;padding:15px 16px;font-size:15px}
+  .k-metrics{grid-template-columns:1fr}
+  .k-phone{grid-template-columns:92px 1fr}
+  .k-link{width:20px}
+  .k-route{padding:18px 52px 12px}
+  .k-chapter{top:42px;font-size:9px;letter-spacing:.28em}
+  .k-back{margin-bottom:20px}
+  .k-nav-actions{position:sticky;bottom:-1px;margin:20px -16px -104px;
+    padding:24px 16px calc(22px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.88) 32%,#000 100%);
+    backdrop-filter:blur(3px)}
+  .k-nav-actions .k-cta{width:100%;min-height:54px;margin-top:0;justify-content:center}
+  .k-tools{bottom:12px!important;right:12px!important}
+  .k-tool{width:40px;height:40px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important}
+}

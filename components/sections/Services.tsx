@@ -42,7 +42,7 @@ export function Services() {
   return (
     <section
       id="servicios"
-      className="relative scroll-mt-20 overflow-hidden border-t border-border bg-surface py-20 sm:scroll-mt-24 sm:py-24 lg:py-32 dark:bg-background"
+      className="relative scroll-mt-20 overflow-hidden border-t border-border bg-black py-20 sm:scroll-mt-24 sm:py-24 lg:py-32"
     >
       {/* Separador: línea con gradiente */}
       <div

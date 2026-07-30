@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { NavItem } from "@/components/MobileBottomNav";
 import { SoundToggle } from "@/components/ui/SoundToggle";
+import { useQuizModal } from "@/components/ui/QuizModal";
 
 type DesktopNavProps = {
   items: NavItem[];
@@ -16,6 +17,7 @@ export function DesktopNav({
   activeIndex,
   onSelect,
 }: DesktopNavProps) {
+  const { openQuiz } = useQuizModal();
   const navigationItems = items.slice(0, -1);
   const contactItem = items.at(-1);
 
@@ -70,16 +72,13 @@ export function DesktopNav({
       <span className="h-6 w-px bg-white/10" aria-hidden />
       <SoundToggle className="h-9 w-9 border-white/10 text-white/55" />
       {contactItem && (
-        <Link
-          href={contactItem.href}
-          onClick={(event) => {
-            event.preventDefault();
-            onSelect(items.length - 1);
-          }}
+        <button
+          type="button"
+          onClick={openQuiz}
           className="whitespace-nowrap rounded-full bg-white px-5 py-2.5 text-xs font-medium text-slate-950 transition-colors hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 lg:text-sm"
         >
           Hablemos
-        </Link>
+        </button>
       )}
     </nav>
   );

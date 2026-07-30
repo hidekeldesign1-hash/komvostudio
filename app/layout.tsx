@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { QuizModalProvider } from "@/components/ui/QuizModal";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -14,8 +15,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#faf9f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f0f12" },
+    { media: "(prefers-color-scheme: light)", color: "#000000" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
 };
 
@@ -37,9 +38,11 @@ export default function RootLayout({
   return (
     <html lang="es" className={inter.variable} suppressHydrationWarning>
       <body className="min-h-screen antialiased font-sans" suppressHydrationWarning>
-        <Navbar />
-        <main className="pb-24 md:pb-0">{children}</main>
-        <Footer />
+        <QuizModalProvider>
+          <Navbar />
+          <main className="pb-24 md:pb-0">{children}</main>
+          <Footer />
+        </QuizModalProvider>
       </body>
     </html>
   );

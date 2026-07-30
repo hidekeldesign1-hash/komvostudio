@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { fadeInUp, staggerContainer, viewportOnce } from "@/lib/animations";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { useQuizModal } from "@/components/ui/QuizModal";
 
 const projects = [
   {
@@ -31,13 +31,15 @@ const projects = [
 ];
 
 export function Portfolio() {
+  const { openQuiz } = useQuizModal();
+
   return (
     <section
       id="portfolio"
-      className="relative scroll-mt-20 overflow-hidden border-t border-border bg-[#111114] py-20 text-white sm:scroll-mt-24 sm:py-24 lg:py-32"
+      className="relative scroll-mt-20 overflow-hidden border-t border-border bg-black py-20 text-white sm:scroll-mt-24 sm:py-24 lg:py-32"
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(6,182,212,0.14),transparent_28%),radial-gradient(circle_at_82%_70%,rgba(99,102,241,0.12),transparent_34%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(6,182,212,0.14),transparent_28%),radial-gradient(circle_at_82%_70%,rgba(37,99,235,0.1),transparent_34%)]"
         aria-hidden
       />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -130,13 +132,14 @@ export function Portfolio() {
           viewport={viewportOnce}
           className="mt-10 flex justify-center"
         >
-          <Link
-            href="#contacto"
+          <button
+            type="button"
+            onClick={openQuiz}
             className="inline-flex items-center gap-3 rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-cyan-500/60 hover:bg-cyan-950/20"
           >
             Quiero una solución para mi negocio
             <span aria-hidden>→</span>
-          </Link>
+          </button>
         </motion.div>
       </div>
     </section>

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { HeroCanvas } from "@/components/HeroCanvas";
+import { useQuizModal } from "@/components/ui/QuizModal";
 
 type HeroProps = {
   canvasPaused?: boolean;
@@ -14,14 +15,16 @@ export const Hero = forwardRef<HTMLElement, HeroProps>(function Hero(
   { canvasPaused = false },
   ref,
 ) {
+  const { openQuiz } = useQuizModal();
+
   return (
     <section
       id="hero"
       ref={ref}
-      className="relative flex min-h-screen items-center overflow-hidden bg-[#050505] px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:px-8 lg:pb-24 lg:pt-36"
+      className="relative flex min-h-screen items-center overflow-hidden bg-black px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:px-8 lg:pb-24 lg:pt-36"
     >
       <HeroCanvas paused={canvasPaused} />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(6,182,212,0.12),transparent_32%),radial-gradient(circle_at_62%_55%,rgba(99,102,241,0.12),transparent_38%),linear-gradient(to_bottom,transparent_70%,#050505_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(6,182,212,0.12),transparent_32%),radial-gradient(circle_at_62%_55%,rgba(37,99,235,0.1),transparent_38%),linear-gradient(to_bottom,transparent_70%,#000_100%)]" />
 
       <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-14 lg:grid-cols-12 lg:gap-10 xl:gap-16">
         <motion.div
@@ -68,15 +71,16 @@ export const Hero = forwardRef<HTMLElement, HeroProps>(function Hero(
             className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap"
           >
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="#contacto"
+              <button
+                type="button"
+                onClick={openQuiz}
                 className="group inline-flex min-h-[52px] w-full items-center justify-center gap-3 rounded-full bg-gradient-to-r from-cyan-500 to-indigo-600 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 sm:w-auto sm:text-base"
               >
                 Platiquemos tu proyecto
                 <span className="transition-transform group-hover:translate-x-1" aria-hidden>
                   →
                 </span>
-              </Link>
+              </button>
             </motion.div>
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
               <Link

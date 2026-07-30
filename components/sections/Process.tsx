@@ -42,7 +42,7 @@ export function Process() {
   return (
     <section
       id="proceso"
-      className="relative scroll-mt-20 overflow-hidden border-t border-border py-20 sm:scroll-mt-24 sm:py-24 lg:py-32"
+      className="relative scroll-mt-20 overflow-hidden border-t border-border bg-black py-20 sm:scroll-mt-24 sm:py-24 lg:py-32"
     >
       <div
         className="pointer-events-none absolute left-0 top-1/3 h-80 w-80 -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl"

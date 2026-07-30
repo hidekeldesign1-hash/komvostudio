@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useId, useLayoutEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -19,6 +20,7 @@ type MobileBottomNavProps = {
 };
 
 const spring = { type: "spring", stiffness: 350, damping: 25 } as const;
+const MOBILE_ITEM_ORDER = [1, 2, 0, 3, 4];
 
 export function MobileBottomNav({
   items,
@@ -27,33 +29,81 @@ export function MobileBottomNav({
 }: MobileBottomNavProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [barWidth, setBarWidth] = useState(0);
+  const orderedItems = MOBILE_ITEM_ORDER.map((itemIndex) => ({
+    item: items[itemIndex],
+    itemIndex,
+  })).filter(({ item }) => Boolean(item));
+  const activeDisplayIndex = Math.max(
+    0,
+    orderedItems.findIndex(({ itemIndex }) => itemIndex === activeIndex),
+  );
   const gradientId = `mobile-nav-gradient-${useId().replace(/:/g, "")}`;
-  const slotWidth = barWidth / items.length;
-  const activeX = slotWidth * activeIndex + slotWidth / 2 - 26;
+  const slotWidth = barWidth / orderedItems.length;
+  const activeX = slotWidth * activeDisplayIndex + slotWidth / 2 - 26;
   const notchCenter =
-    activeIndex * (375 / items.length) + 375 / items.length / 2;
+    activeDisplayIndex * (375 / orderedItems.length) +
+    375 / orderedItems.length / 2;
+  const isFirst = activeDisplayIndex === 0;
+  const isLast = activeDisplayIndex === orderedItems.length - 1;
   const notchHalfWidth =
-    activeIndex === 0 || activeIndex === items.length - 1 ? 36 : 48;
+    isFirst || isLast ? 38 : 48;
   const notchShoulder = notchHalfWidth * 0.66;
   const notchDepth = 34;
-  const backgroundPath = [
-    "M 0 18",
-    "Q 0 0 10 0",
-    `L ${notchCenter - notchHalfWidth} 0`,
-    `C ${notchCenter - notchShoulder} 0 ${
-      notchCenter - notchShoulder
-    } ${notchDepth} ${notchCenter} ${notchDepth}`,
-    `C ${notchCenter + notchShoulder} ${notchDepth} ${
-      notchCenter + notchShoulder
-    } 0 ${notchCenter + notchHalfWidth} 0`,
-    "L 365 0",
-    "Q 375 0 375 10",
-    "L 375 54",
-    "Q 375 64 365 64",
-    "L 10 64",
-    "Q 0 64 0 54",
-    "Z",
-  ].join(" ");
+  const backgroundPath = isFirst
+    ? [
+        `M 0 ${notchDepth}`,
+        `L ${notchCenter} ${notchDepth}`,
+        `C ${notchCenter + notchShoulder} ${notchDepth} ${
+          notchCenter + notchShoulder
+        } 0 ${notchCenter + notchHalfWidth} 0`,
+        "L 365 0",
+        "Q 375 0 375 10",
+        "L 375 96",
+        "L 0 96",
+        "Z",
+      ].join(" ")
+    : isLast
+      ? [
+          "M 0 18",
+          "Q 0 0 10 0",
+          `L ${notchCenter - notchHalfWidth} 0`,
+          `C ${notchCenter - notchShoulder} 0 ${
+            notchCenter - notchShoulder
+          } ${notchDepth} ${notchCenter} ${notchDepth}`,
+          `L 375 ${notchDepth}`,
+          "L 375 96",
+          "L 0 96",
+          "Z",
+        ].join(" ")
+      : [
+          "M 0 18",
+          "Q 0 0 10 0",
+          `L ${notchCenter - notchHalfWidth} 0`,
+          `C ${notchCenter - notchShoulder} 0 ${
+            notchCenter - notchShoulder
+          } ${notchDepth} ${notchCenter} ${notchDepth}`,
+          `C ${notchCenter + notchShoulder} ${notchDepth} ${
+            notchCenter + notchShoulder
+          } 0 ${notchCenter + notchHalfWidth} 0`,
+          "L 365 0",
+          "Q 375 0 375 10",
+          "L 375 96",
+          "L 0 96",
+          "Z",
+        ].join(" ");
+
+  const renderIcon = (item: NavItem, active = false) =>
+    item.id === "hero" ? (
+      <Image
+        src="/favicon-k.png"
+        alt=""
+        width={active ? 28 : 20}
+        height={active ? 28 : 20}
+        className={active ? "h-7 w-7 object-contain" : "h-5 w-5 object-contain"}
+      />
+    ) : (
+      item.icon
+    );
 
   useLayoutEffect(() => {
     const bar = barRef.current;
@@ -69,16 +119,16 @@ export function MobileBottomNav({
   return (
     <nav
       aria-label="Navegación principal móvil"
-      className="fixed bottom-8 left-4 right-4 z-50 block sm:bottom-10 md:hidden"
+      className="fixed bottom-0 left-4 right-4 z-50 block md:hidden"
     >
       <div
         ref={barRef}
-        className="relative h-16 max-w-none shadow-2xl shadow-black/40 backdrop-blur-lg"
+        className="relative h-24 max-w-none shadow-2xl shadow-black/40 backdrop-blur-lg sm:h-[104px]"
       >
         <svg
-          viewBox="0 0 375 64"
+          viewBox="0 0 375 96"
           preserveAspectRatio="none"
-          className="absolute inset-0 h-16 w-full overflow-visible"
+          className="absolute inset-0 h-full w-full overflow-visible"
           aria-hidden
         >
           <defs>
@@ -103,26 +153,28 @@ export function MobileBottomNav({
             initial={false}
             animate={{ x: activeX }}
             transition={spring}
-            className="pointer-events-none absolute -top-6 left-0 z-30 flex h-[52px] w-[52px] items-center justify-center rounded-full border border-cyan-200/25 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+            className="pointer-events-none absolute -top-6 left-0 z-30 flex h-[52px] w-[52px] items-center justify-center rounded-full border border-white bg-white text-slate-950 shadow-[0_0_20px_rgba(255,255,255,0.22)]"
             aria-hidden
           >
-            {items[activeIndex]?.icon}
+            {renderIcon(items[activeIndex], true)}
           </motion.div>
         )}
 
         <ul
-          className="relative z-20 grid h-full"
-          style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+          className="relative z-20 grid h-16"
+          style={{
+            gridTemplateColumns: `repeat(${orderedItems.length}, minmax(0, 1fr))`,
+          }}
         >
-          {items.map((item, index) => {
-            const active = activeIndex === index;
+          {orderedItems.map(({ item, itemIndex }) => {
+            const active = activeIndex === itemIndex;
             return (
               <li key={item.id} className="min-w-0">
                 <Link
                   href={item.href}
                   onClick={(event) => {
                     event.preventDefault();
-                    onSelect(index);
+                    onSelect(itemIndex);
                   }}
                   aria-current={active ? "page" : undefined}
                   className="flex h-full min-w-0 flex-col items-center justify-end gap-1 pb-2 pt-6 text-center text-white/45 outline-none transition-colors hover:text-white focus-visible:text-cyan-300"
@@ -133,7 +185,7 @@ export function MobileBottomNav({
                     }`}
                     aria-hidden
                   >
-                    {item.icon}
+                    {renderIcon(item)}
                   </span>
                   <span
                     className={`max-w-full truncate text-[9px] font-medium ${

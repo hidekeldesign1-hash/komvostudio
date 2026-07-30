@@ -4,7 +4,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border bg-surface/30 py-8 sm:py-10">
+    <footer className="border-t border-border bg-black py-8 sm:py-10">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Redes sociales: arriba de el último texto, abajo de bullets y línea */}
         <div className="flex justify-center pb-6 sm:pb-8">
