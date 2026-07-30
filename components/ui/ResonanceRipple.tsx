@@ -67,10 +67,10 @@ export function ResonanceContainer({
               height: ripple.size,
               borderRadius: "50%",
               background:
-                "radial-gradient(circle, rgba(56, 189, 248, 0.4) 0%, rgba(129, 140, 248, 0.2) 40%, rgba(255, 255, 255, 0) 70%)",
-              border: "1px solid rgba(56, 189, 248, 0.3)",
+                "radial-gradient(circle, rgba(236, 72, 153, 0.45) 0%, rgba(139, 92, 246, 0.3) 40%, rgba(59, 130, 246, 0) 70%)",
+              border: "1px solid rgba(236, 72, 153, 0.5)",
               boxShadow:
-                "0 0 28px rgba(56, 189, 248, 0.18), inset 0 0 24px rgba(129, 140, 248, 0.12)",
+                "0 0 30px rgba(236, 72, 153, 0.24), inset 0 0 26px rgba(139, 92, 246, 0.18)",
             }}
           />
         ))}

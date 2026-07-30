@@ -80,7 +80,7 @@ export function StickyCTA({ heroRef, ctaRef }: StickyCTAProps) {
             damping: 18,
             mass: 0.8,
           }}
-          className="fixed bottom-4 right-3 z-40 sm:bottom-6 sm:right-4 md:bottom-8 md:right-6 lg:bottom-10 lg:right-8"
+          className="fixed bottom-[7.25rem] right-3 z-[60] sm:bottom-[8rem] sm:right-4 md:bottom-8 md:right-6 md:z-40 lg:bottom-10 lg:right-8"
           aria-hidden={!visible}
         >
           <button

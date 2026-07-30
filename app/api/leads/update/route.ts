@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       Object.assign(patch, columnsFromAnswers(answers));
       patch.answers_json = JSON.stringify(answers).slice(0, 45000);
     }
-    const ok = await updateLead(lead_id, patch);
+    const ok = await updateLead(lead_id, patch, { timeoutMs: 20_000 });
     if (!ok) return NextResponse.json({ error: "Lead no encontrado." }, { status: 404 });
     return NextResponse.json({ ok: true });
   } catch (e) {

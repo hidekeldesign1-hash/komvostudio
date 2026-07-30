@@ -17,12 +17,14 @@ import {
 type GlassCardProps = PropsWithChildren<{
   className?: string;
   contentClassName?: string;
+  resonance?: boolean;
 }>;
 
 export function GlassCard({
   children,
   className = "",
   contentClassName = "",
+  resonance = true,
 }: GlassCardProps) {
   const reducedMotion = useReducedMotion();
   const mouseX = useMotionValue(0);
@@ -60,7 +62,7 @@ export function GlassCard({
   return (
     <motion.div
       onMouseMove={handleMouseMove}
-      onClick={createRipple}
+      onClick={resonance ? createRipple : undefined}
       onMouseLeave={() => {
         normalizedX.set(0);
         normalizedY.set(0);
@@ -93,7 +95,9 @@ export function GlassCard({
         aria-hidden
       />
       <div className={`relative z-10 h-full ${contentClassName}`}>{children}</div>
-      <ResonanceContainer ripples={ripples} removeRipple={removeRipple} />
+      {resonance && (
+        <ResonanceContainer ripples={ripples} removeRipple={removeRipple} />
+      )}
     </motion.div>
   );
 }

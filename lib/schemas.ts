@@ -6,7 +6,7 @@ export const LeadCreateSchema = z.object({
   full_name: z.string().trim().min(2).max(120),
   whatsapp: z.string().trim().regex(/^\+?[0-9\s\-()]{8,20}$/, "WhatsApp inválido"),
   email: z.string().trim().email(),
-  city_state: z.string().trim().min(2).max(120),
+  city_state: z.string().trim().max(120).optional().default(""),
   terms_accepted: z.literal(true),
   source_url: z.string().max(500).optional().default(""),
   utm_source: z.string().max(120).optional().default(""),
