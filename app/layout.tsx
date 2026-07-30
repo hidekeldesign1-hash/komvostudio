@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/Header";
+import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
 const inter = Inter({
@@ -37,8 +37,8 @@ export default function RootLayout({
   return (
     <html lang="es" className={inter.variable} suppressHydrationWarning>
       <body className="min-h-screen antialiased font-sans" suppressHydrationWarning>
-        <Header />
-        <main>{children}</main>
+        <Navbar />
+        <main className="pb-24 md:pb-0">{children}</main>
         <Footer />
       </body>
     </html>

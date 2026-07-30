@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { LiquidConnect } from "@/components/ui/LiquidConnect";
+import { PulseButton } from "@/components/ui/PulseButton";
 
 const TIPO_NEGOCIO = [
   "Servicios profesionales",
@@ -109,11 +112,13 @@ export function AgendaModal({ open, onClose }: AgendaModalProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 16 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="w-full max-h-[90vh] max-w-lg overflow-y-auto rounded-2xl border border-border bg-background p-6 shadow-2xl sm:p-8"
+              className="w-full max-w-lg"
               role="dialog"
               aria-modal="true"
               aria-labelledby="agenda-modal-title"
             >
+            <GlassCard className="max-h-[90vh] shadow-2xl">
+            <div className="max-h-[90vh] overflow-y-auto p-6 sm:p-8">
             <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
               <h2 id="agenda-modal-title" className="text-xl font-bold text-foreground sm:text-2xl">
                 Agendar llamada
@@ -139,13 +144,14 @@ export function AgendaModal({ open, onClose }: AgendaModalProps) {
                 <p className="mt-2 text-sm text-muted-foreground">
                   Te contactaremos pronto para confirmar la llamada.
                 </p>
-                <button
+                <PulseButton
                   type="button"
                   onClick={handleClose}
-                  className="mt-6 rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-accent-foreground hover:bg-accent/90"
+                  variant="primary"
+                  className="mt-6 px-6 py-2.5 text-sm font-medium"
                 >
                   Cerrar
-                </button>
+                </PulseButton>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="mt-6 space-y-6">
@@ -183,7 +189,10 @@ export function AgendaModal({ open, onClose }: AgendaModalProps) {
                 </div>
 
                 {/* 3. Tipo de negocio */}
-                <div>
+                <LiquidConnect
+                  active={Boolean(form.tipo_negocio)}
+                  connectionId="agenda-tipo"
+                >
                   <label htmlFor="agenda-tipo" className="block text-sm font-medium text-foreground">
                     ¿Qué tipo de negocio tienes?
                   </label>
@@ -199,10 +208,13 @@ export function AgendaModal({ open, onClose }: AgendaModalProps) {
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
-                </div>
+                </LiquidConnect>
 
                 {/* 4. Qué busca mejorar */}
-                <div>
+                <LiquidConnect
+                  active={Boolean(form.mejorar)}
+                  connectionId="agenda-mejorar"
+                >
                   <label htmlFor="agenda-mejorar" className="block text-sm font-medium text-foreground">
                     ¿Qué te gustaría mejorar principalmente?
                   </label>
@@ -218,10 +230,13 @@ export function AgendaModal({ open, onClose }: AgendaModalProps) {
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
-                </div>
+                </LiquidConnect>
 
                 {/* 5. Presupuesto */}
-                <div>
+                <LiquidConnect
+                  active={Boolean(form.presupuesto)}
+                  connectionId="agenda-presupuesto"
+                >
                   <label htmlFor="agenda-presupuesto" className="block text-sm font-medium text-foreground">
                     Para trabajar en tu presencia digital, ¿cuentas con presupuesto?
                   </label>
@@ -237,7 +252,7 @@ export function AgendaModal({ open, onClose }: AgendaModalProps) {
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
-                </div>
+                </LiquidConnect>
 
                 {/* 6. Día y horario */}
                 <div>
@@ -269,16 +284,19 @@ export function AgendaModal({ open, onClose }: AgendaModalProps) {
                   >
                     Cancelar
                   </button>
-                  <button
+                  <PulseButton
                     type="submit"
                     disabled={sending}
-                    className="rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-accent-foreground hover:bg-accent/90 disabled:opacity-50"
+                    variant="primary"
+                    className="px-6 py-2.5 text-sm font-medium"
                   >
                     {sending ? "Enviando…" : "Enviar"}
-                  </button>
+                  </PulseButton>
                 </div>
               </form>
             )}
+            </div>
+            </GlassCard>
             </motion.div>
           </div>
         </>

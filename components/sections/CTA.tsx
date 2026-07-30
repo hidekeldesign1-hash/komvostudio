@@ -4,6 +4,7 @@ import { forwardRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { AgendaModal } from "@/components/ui/AgendaModal";
+import { PulseButton } from "@/components/ui/PulseButton";
 
 const BULLETS = [
   "Diseño claro",
@@ -72,17 +73,17 @@ export const CTA = forwardRef<HTMLElement>(function CTA(_, ref) {
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-[48px] items-center justify-center rounded-full bg-black px-6 py-3.5 text-base font-medium text-white shadow-glow-sm transition-colors duration-200 hover:bg-[#D7C9B1] hover:text-black focus-visible:bg-[#D7C9B1] focus-visible:text-black dark:bg-accent dark:text-white dark:hover:bg-accent-hover dark:hover:text-white dark:focus-visible:bg-accent-hover dark:focus-visible:text-white sm:min-h-0 sm:px-8 sm:py-4"
+            className="flex min-h-[48px] items-center justify-center rounded-full bg-gradient-to-r from-cyan-500 to-indigo-600 px-6 py-3.5 text-base font-medium text-white shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 sm:min-h-0 sm:px-8 sm:py-4"
           >
             Quiero empezar
           </Link>
-          <button
+          <PulseButton
             type="button"
             onClick={() => setAgendaOpen(true)}
-            className="flex min-h-[48px] items-center justify-center rounded-full border border-border-strong bg-surface px-6 py-3.5 text-base font-medium text-foreground transition-all hover:bg-surface-elevated hover:border-muted-soft/30 sm:min-h-0 sm:px-8 sm:py-4"
+            className="flex min-h-[48px] items-center justify-center px-6 py-3.5 text-base font-medium sm:min-h-0 sm:px-8 sm:py-4"
           >
             Agendar llamada
-          </button>
+          </PulseButton>
             <AgendaModal open={agendaOpen} onClose={() => setAgendaOpen(false)} />
         </div>
         <p className="mt-8 text-sm text-foreground sm:mt-10">
@@ -119,7 +120,7 @@ export const CTA = forwardRef<HTMLElement>(function CTA(_, ref) {
           </div>
           {/* Barra con glow morado (pegada a los bullets, ancho reducido) */}
           <div
-            className="mx-auto mt-5 h-px max-w-sm bg-gradient-to-r from-transparent via-accent/70 to-transparent shadow-[0_0_12px_1px_var(--accent-glow)] sm:mt-6"
+            className="mx-auto mt-5 h-px max-w-sm bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 shadow-[0_0_12px_1px_rgba(6,182,212,0.25)] sm:mt-6"
             aria-hidden
           />
         </div>

@@ -84,7 +84,7 @@ export function StickyCTA({ heroRef, ctaRef }: StickyCTAProps) {
         >
           <Link
             href="#contacto"
-            className="inline-flex min-h-[36px] min-w-0 max-w-[calc(100vw-1.5rem)] items-center justify-center rounded-full border border-white/15 bg-accent/75 px-3 py-2 text-xs font-medium text-primary shadow-[0_0_20px_-4px_var(--accent-glow)] backdrop-blur-md dark:text-white transition-colors duration-200 hover:bg-accent hover:border-accent hover:shadow-[0_0_28px_-2px_var(--accent-glow)] focus-visible:outline-none focus-visible:bg-accent focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[44px] sm:px-5 sm:py-2.5 sm:text-sm md:min-h-[48px] md:px-6 md:py-3 md:text-base"
+            className="inline-flex min-h-[36px] min-w-0 max-w-[calc(100vw-1.5rem)] items-center justify-center rounded-full border border-cyan-300/20 bg-gradient-to-r from-cyan-500/90 to-indigo-600/90 px-3 py-2 text-xs font-medium text-white shadow-[0_0_20px_rgba(6,182,212,0.3)] backdrop-blur-md transition-opacity duration-200 hover:opacity-90 hover:shadow-[0_0_28px_rgba(99,102,241,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:min-h-[44px] sm:px-5 sm:py-2.5 sm:text-sm md:min-h-[48px] md:px-6 md:py-3 md:text-base"
           >
             Platiquemos tu proyecto
           </Link>
