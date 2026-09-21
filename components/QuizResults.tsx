@@ -55,7 +55,6 @@ const DEFAULT_ROUTE = ROUTES["Ecosistema Completo"];
 
 export function QuizResults({
   projectName,
-  fullName,
   answers,
   onBack,
 }: {
@@ -76,25 +75,7 @@ export function QuizResults({
     answers.category === "Otro" && answers.category_other?.trim()
       ? answers.category_other.trim()
       : answers.category || "Por definir";
-  const assets = answers.existing_assets?.join(", ") || "Sin activos registrados";
   const goalsLabel = selectedGoals.join(", ") || "Por definir";
-  const summary = [
-    `Diagnóstico KOMVOS para ${projectName}`,
-    `Categoría: ${categoryLabel}`,
-    `Estado: ${answers.business_stage || "Por definir"}`,
-    `Ecosistema actual: ${assets}`,
-    `Prioridades: ${goalsLabel}`,
-    `Prioridad recomendada: ${recommendedGoal || "Por definir"}`,
-    `Inicio: ${answers.desired_start || "Por definir"}`,
-  ].join("\n");
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "525532584558";
-  const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    `Hola, soy ${fullName}. Completé mi diagnóstico para ${projectName}.\n\n${summary}\n\nQuiero revisar esta ruta con KOMVOS.`,
-  )}`;
-
-  const openWhatsApp = () => {
-    window.open(whatsappHref, "_blank", "noopener,noreferrer");
-  };
 
   return (
     <motion.section
@@ -164,13 +145,6 @@ export function QuizResults({
           onClick={openBooking}
         >
           Agendar Sesión Estratégica
-        </PulseButton>
-        <PulseButton
-          variant="glass"
-          className="k-whatsapp-button"
-          onClick={openWhatsApp}
-        >
-          Enviar Diagnóstico por WhatsApp
         </PulseButton>
       </div>
     </motion.section>

@@ -55,14 +55,17 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
         serif: ["var(--font-serif)", "serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
       borderRadius: {
-        sm: "calc(var(--radius) - 4px)",
-        md: "calc(var(--radius) - 2px)",
-        lg: "var(--radius)",
-        xl: "calc(var(--radius) + 4px)",
+        sm: "calc(var(--radius-control) - 4px)",
+        md: "calc(var(--radius-control) - 2px)",
+        lg: "var(--radius-control)",
+        xl: "var(--radius-control)",
+        "2xl": "var(--radius-card)",
+        "3xl": "var(--radius-modal)",
       },
       letterSpacing: {
         tighter: "calc(var(--tracking-normal) - 0.05em)",

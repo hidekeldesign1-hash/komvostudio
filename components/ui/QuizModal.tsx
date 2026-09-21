@@ -11,7 +11,6 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import QuizExperience from "@/components/QuizExperience";
-import { HeroCanvas } from "@/components/HeroCanvas";
 import "@/app/quiz.css";
 
 type QuizModalContextValue = {
@@ -76,9 +75,8 @@ export function QuizModalProvider({ children }: PropsWithChildren) {
               className="absolute inset-0 bg-black"
               onClick={closeQuiz}
             />
-            <HeroCanvas />
             <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(6,182,212,0.12),transparent_32%),radial-gradient(circle_at_62%_55%,rgba(37,99,235,0.1),transparent_38%)]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_42%,rgba(6,182,212,0.12),transparent_32%),radial-gradient(circle_at_62%_55%,rgba(99,102,241,0.1),transparent_38%)]"
               aria-hidden
             />
             <motion.div

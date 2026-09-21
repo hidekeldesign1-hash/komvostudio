@@ -2,6 +2,9 @@
  * KOMVOS · Agenda + Quiz
  * Pega TODO este archivo en Extensiones → Apps Script de la hoja "Agenda".
  * Conserva la pestaña Agenda y crea automáticamente una pestaña "Quiz Leads".
+ *
+ * Columnas Agenda (A–E):
+ * Fecha de solicitud | Día seleccionado | Nombre | WhatsApp | Horario
  */
 var QUIZ_SHEET = "Quiz Leads";
 var QUIZ_KEYS = [
@@ -35,6 +38,15 @@ var QUIZ_HEADERS = [
   "Puntuación del lead","Siguiente paso","Aceptación de privacidad"
 ];
 
+var AGENDA_SHEET = "Agenda";
+var AGENDA_HEADERS = [
+  "Fecha de solicitud",
+  "Día seleccionado",
+  "Nombre",
+  "WhatsApp",
+  "Horario"
+];
+
 function jsonOutput(data) {
   return ContentService
     .createTextOutput(JSON.stringify(data))
@@ -50,6 +62,54 @@ function ensureQuizSheet() {
   sheet.getRange("B:C").setNumberFormat("dd/MM/yyyy HH:mm:ss");
   sheet.getRange("AZ:AZ").setNumberFormat("dd/MM/yyyy HH:mm:ss");
   return sheet;
+}
+
+function getAgendaSheet() {
+  var book = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = book.getSheetByName(AGENDA_SHEET);
+  if (!sheet) {
+    sheet = book.getSheets()[0];
+    sheet.setName(AGENDA_SHEET);
+  }
+  return sheet;
+}
+
+function ensureAgendaSheet() {
+  return resetAgendaSheet(getAgendaSheet(), false);
+}
+
+/** Reescribe encabezados a las 5 columnas correctas y opcionalmente limpia filas de datos. */
+function resetAgendaSheet(sheet, clearData) {
+  var lastCol = Math.max(sheet.getLastColumn(), AGENDA_HEADERS.length);
+  var lastRow = sheet.getLastRow();
+
+  if (clearData && lastRow > 1) {
+    sheet.getRange(2, 1, lastRow, lastCol).clearContent();
+  }
+
+  sheet.getRange(1, 1, 1, AGENDA_HEADERS.length).setValues([AGENDA_HEADERS]);
+  sheet.getRange(1, 1, 1, AGENDA_HEADERS.length).setFontWeight("bold");
+  sheet.setFrozenRows(1);
+  sheet.getRange("A:A").setNumberFormat("dd/MM/yyyy HH:mm:ss");
+
+  lastCol = sheet.getLastColumn();
+  if (lastCol > AGENDA_HEADERS.length) {
+    sheet.deleteColumns(AGENDA_HEADERS.length + 1, lastCol - AGENDA_HEADERS.length);
+  }
+
+  return sheet;
+}
+
+function setupAgenda(body) {
+  var clearData = !(body && body.clear_data === false);
+  var sheet = resetAgendaSheet(getAgendaSheet(), clearData);
+  return {
+    ok: true,
+    action: "setup_agenda",
+    headers: AGENDA_HEADERS,
+    cleared: clearData,
+    sheet: sheet.getName()
+  };
 }
 
 function valueForCell(key, value) {
@@ -114,18 +174,53 @@ function getQuizLead(body) {
 }
 
 function appendAgenda(body) {
-  var book = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = book.getSheetByName("Agenda") || book.getActiveSheet();
+  var sheet = ensureAgendaSheet();
+  var dia = String(body.dia || "").trim();
+  var horario = String(body.horario || "").trim();
+  var occupied = getOccupiedSlots({ dia: dia }).occupied || [];
+  if (horario && occupied.indexOf(horario) !== -1) {
+    return { ok: false, error: "Ese horario ya está reservado. Elige otro." };
+  }
   sheet.appendRow([
     new Date(),
+    dia,
     body.nombre || "",
     body.whatsapp || "",
-    body.tipo_negocio || "",
-    body.mejorar || "",
-    body.presupuesto || "",
-    body.fecha_hora || ""
+    horario
   ]);
   return { ok: true };
+}
+
+function getOccupiedSlots(body) {
+  var sheet = ensureAgendaSheet();
+  var dia = String(body.dia || "").trim();
+  var occupied = [];
+  var lastRow = sheet.getLastRow();
+  if (!dia || lastRow < 2) {
+    return { ok: true, occupied: occupied };
+  }
+  var rows = sheet.getRange(2, 1, lastRow, 5).getValues();
+  for (var i = 0; i < rows.length; i++) {
+    if (String(rows[i][1]).trim() === dia) {
+      var slot = String(rows[i][4]).trim();
+      if (slot) occupied.push(slot);
+    }
+  }
+  return { ok: true, occupied: occupied };
+}
+
+function doGet(e) {
+  var params = (e && e.parameter) || {};
+  if (params.action === "setup_agenda") {
+    return jsonOutput(setupAgenda({ clear_data: params.clear_data !== "false" }));
+  }
+  if (params.action === "agenda_slots") {
+    return jsonOutput(getOccupiedSlots({ dia: params.dia || "" }));
+  }
+  if (params.action === "ping") {
+    return jsonOutput({ ok: true, service: "komvos-agenda", version: "v3" });
+  }
+  return jsonOutput({ ok: true, service: "komvos-agenda", hint: "Usa POST con JSON o ?action=ping" });
 }
 
 function doPost(e) {
@@ -137,6 +232,8 @@ function doPost(e) {
     if (body.action === "quiz_create") result = createQuizLead(body);
     else if (body.action === "quiz_update") result = updateQuizLead(body);
     else if (body.action === "quiz_get") result = getQuizLead(body);
+    else if (body.action === "agenda_slots") result = getOccupiedSlots(body);
+    else if (body.action === "setup_agenda") result = setupAgenda(body);
     else result = appendAgenda(body);
     return jsonOutput(result);
   } catch (err) {

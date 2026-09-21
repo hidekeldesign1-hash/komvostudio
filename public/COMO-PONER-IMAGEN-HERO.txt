@@ -1,8 +1,0 @@
-Para que la imagen de oficina se vea como fondo del Hero:
-
-1. Copia tu imagen (la de la oficina que subiste) a esta carpeta (public).
-2. Renómbrala exactamente a: hero-bg.jpg
-
-La ruta final debe ser: public/hero-bg.jpg
-
-Así Next.js la servirá y el Hero la usará como fondo con el overlay para que el texto se lea bien.
