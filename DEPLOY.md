@@ -146,8 +146,8 @@ Vercel detecta Next.js y suele dejar:
 
 1. En la misma pantalla de importación, abre **Environment Variables**.
 2. **Name:** `GOOGLE_SHEETS_WEBAPP_URL`
-3. **Value:** la URL de tu aplicación web de Google Apps Script (la que termina en `/exec`). Ejemplo:  
-   `https://script.google.com/macros/s/AKfycbx.../exec`
+3. **Value:** la URL de tu aplicación web de Google Apps Script (la que termina en `/exec`):  
+   `https://script.google.com/macros/s/AKfycbyEm1moZNr9KBxLTQaoNTovkmu8QVFhVLprRbqNu_pg8e6ad79fWMwG6h17dmPLl8xt/exec`
 4. Asegúrate de que esté aplicada a **Production** (y opcionalmente Preview).
 5. Si ya desplegaste antes, después de añadirla ve a **Settings → Environment Variables** y haz **Redeploy** del último deployment para que la tome.
 

@@ -46,10 +46,10 @@ Al enviar una solicitud se guarda:
 
 ## 4. Variable en el proyecto
 
-En `.env.local` (y en Vercel/Hostinger):
+En `.env.local` (y en Vercel → Environment Variables):
 
 ```
-GOOGLE_SHEETS_WEBAPP_URL=https://script.google.com/macros/s/XXXXXXXX/exec
+GOOGLE_SHEETS_WEBAPP_URL=https://script.google.com/macros/s/AKfycbyEm1moZNr9KBxLTQaoNTovkmu8QVFhVLprRbqNu_pg8e6ad79fWMwG6h17dmPLl8xt/exec
 ```
 
 Reinicia el servidor local tras cambiarla.
