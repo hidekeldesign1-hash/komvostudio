@@ -36,7 +36,7 @@ function nameHasLink(value: string) {
 }
 
 /** Normaliza horarios tipo "10:00 a. m." → "10:00 AM" */
-export function normalizeSlot(value: string): string {
+function normalizeSlot(value: string): string {
   const raw = String(value || "")
     .toUpperCase()
     .replace(/\./g, "")
