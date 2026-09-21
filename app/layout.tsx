@@ -68,9 +68,9 @@ export const metadata: Metadata = {
   applicationName: "Komvos",
   category: "business",
   alternates: {
-    canonical: "/",
+    canonical: SITE_URL,
     languages: {
-      "es-MX": "/",
+      "es-MX": SITE_URL,
     },
   },
   openGraph: {
