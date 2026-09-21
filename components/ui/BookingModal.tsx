@@ -166,7 +166,8 @@ function BookingModal({
     setSelectedTime("");
 
     const dia = encodeURIComponent(selectedDayOption.fullLabel);
-    fetch(`/api/agenda?dia=${dia}`)
+    const diaKey = encodeURIComponent(selectedDayOption.key);
+    fetch(`/api/agenda?dia=${dia}&diaKey=${diaKey}`, { cache: "no-store" })
       .then(async (response) => {
         const data = (await response.json().catch(() => ({}))) as {
           occupied?: string[];
@@ -257,6 +258,7 @@ function BookingModal({
           nombre: trimmedName,
           whatsapp: formatMxPhone(phone),
           dia: day.fullLabel,
+          diaKey: day.key,
           horario: selectedTime,
           website_url: formData.honeypot,
         }),
@@ -275,6 +277,9 @@ function BookingModal({
       }
       recordSubmitAttempt();
       setRateLimited(isRateLimited());
+      setOccupiedSlots((prev) =>
+        prev.includes(selectedTime) ? prev : [...prev, selectedTime],
+      );
       setStatus("sent");
     } catch {
       setError("No pudimos guardar tu solicitud. Intenta de nuevo.");
@@ -283,21 +288,6 @@ function BookingModal({
   };
 
   const isSubmitted = status === "sent";
-
-  const whatsappConfirmUrl = useMemo(() => {
-    const businessNumber =
-      process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") || "525532584558";
-    const dayLabel = selectedDayOption?.fullLabel || "el día elegido";
-    const message = [
-      `Hola, soy ${name.trim() || "un cliente"}.`,
-      `Acabo de agendar una llamada con Komvos.`,
-      `📅 Fecha: ${dayLabel}`,
-      `⏰ Horario: ${selectedTime || "por confirmar"}`,
-      `📱 Mi WhatsApp: ${phone || "el que registré"}`,
-      `Quedo atento a la confirmación.`,
-    ].join("\n");
-    return `https://wa.me/${businessNumber}?text=${encodeURIComponent(message)}`;
-  }, [name, phone, selectedDayOption, selectedTime]);
 
   return (
     <AnimatePresence>
@@ -402,29 +392,16 @@ function BookingModal({
                     <span aria-hidden>⏰</span>{" "}
                     <span className="text-slate-500">Horario:</span> {selectedTime || "—"}
                   </p>
-                  <p>
-                    <span aria-hidden>📱</span>{" "}
-                    <span className="text-slate-500">WhatsApp:</span> {phone || "—"}
-                  </p>
                 </div>
 
                 <p className="text-xs text-slate-500">
                   Un especialista de Komvos te contactará puntualmente en el horario elegido.
                 </p>
 
-                <a
-                  href={whatsappConfirmUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-6 inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-emerald-600 px-6 py-3 text-sm font-medium text-white shadow-md transition-all hover:bg-emerald-500"
-                >
-                  Abrir confirmación en WhatsApp
-                </a>
-
                 <button
                   type="button"
                   onClick={onClose}
-                  className="mt-2 w-full py-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-800"
+                  className="mt-6 inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-sm font-medium text-white shadow-md transition-all hover:opacity-95"
                 >
                   Cerrar ventana
                 </button>

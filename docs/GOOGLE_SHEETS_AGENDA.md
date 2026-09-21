@@ -46,13 +46,15 @@ Al enviar una solicitud se guarda:
 
 ## 4. Variable en el proyecto
 
-En `.env.local`:
+En `.env.local` (y en Vercel/Hostinger):
 
 ```
 GOOGLE_SHEETS_WEBAPP_URL=https://script.google.com/macros/s/XXXXXXXX/exec
 ```
 
-Reinicia `npm run dev`. En Vercel/Hostinger añade la misma variable.
+Reinicia el servidor local tras cambiarla.
+
+**Importante:** cada vez que actualices `docs/agenda-webapp-code.js`, vuelve a **Implementar → Nueva versión** en Apps Script. Sin eso, los horarios ocupados no se calculan con la lógica nueva.
 
 ---
 
@@ -60,7 +62,7 @@ Reinicia `npm run dev`. En Vercel/Hostinger añade la misma variable.
 
 1. Clic en **Hablar con Komvos**.
 2. Elige día, horario, nombre y WhatsApp → **Enviar solicitud**.
-3. Debe aparecer una fila nueva solo con esas columnas.
+3. Debe aparecer una fila nueva. En **Día seleccionado** verás algo como `2026-09-22 | MAR 22 de septiembre`.
 4. Vuelve a abrir el modal en el mismo día: ese horario debe verse **ocupado** (tachado / deshabilitado).
 
-Si no llega nada: revisa la URL en `.env.local` y **Ver → Registros de ejecución** en Apps Script.
+Si no llega nada: revisa la URL en el hosting y **Ver → Registros de ejecución** en Apps Script.

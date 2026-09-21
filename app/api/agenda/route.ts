@@ -1,14 +1,31 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type AgendaBody = {
   nombre: string;
   whatsapp: string;
   dia: string;
+  /** Clave estable YYYY-MM-DD para matching de ocupados */
+  diaKey?: string;
   horario: string;
   /** Honeypot — si viene lleno, es bot */
   website_url?: string;
   honeypot?: string;
 };
+
+const CANONICAL_SLOTS = [
+  "10:00 AM",
+  "11:00 AM",
+  "12:00 PM",
+  "01:00 PM",
+  "03:00 PM",
+  "04:00 PM",
+  "05:00 PM",
+  "06:00 PM",
+  "07:00 PM",
+];
 
 function whatsappDigits(value: string) {
   return value.replace(/\D/g, "");
@@ -16,6 +33,33 @@ function whatsappDigits(value: string) {
 
 function nameHasLink(value: string) {
   return /https?:\/\/|www\./i.test(value);
+}
+
+/** Normaliza horarios tipo "10:00 a. m." → "10:00 AM" */
+export function normalizeSlot(value: string): string {
+  const raw = String(value || "")
+    .toUpperCase()
+    .replace(/\./g, "")
+    .replace(/\s+/g, " ")
+    .replace(/A\s*M/g, "AM")
+    .replace(/P\s*M/g, "PM")
+    .trim();
+
+  const match = CANONICAL_SLOTS.find((slot) => {
+    const a = slot.replace(/\s+/g, "");
+    const b = raw.replace(/\s+/g, "");
+    return a === b || slot === raw;
+  });
+  return match || raw;
+}
+
+function canonicalizeOccupied(slots: string[]): string[] {
+  const out: string[] = [];
+  for (const slot of slots) {
+    const normalized = normalizeSlot(slot);
+    if (normalized && !out.includes(normalized)) out.push(normalized);
+  }
+  return out;
 }
 
 async function callSheetsWebApp(payload: Record<string, unknown>) {
@@ -103,20 +147,36 @@ async function callSheetsWebApp(payload: Record<string, unknown>) {
 
 /** Horarios ya reservados para un día (desde la hoja Agenda). */
 export async function GET(request: Request) {
-  const dia = new URL(request.url).searchParams.get("dia")?.trim() || "";
-  if (!dia) {
+  const url = new URL(request.url);
+  const dia = url.searchParams.get("dia")?.trim() || "";
+  const diaKey = url.searchParams.get("diaKey")?.trim() || "";
+  if (!dia && !diaKey) {
     return NextResponse.json({ error: "Falta el parámetro dia." }, { status: 400 });
   }
 
-  const result = await callSheetsWebApp({ action: "agenda_slots", dia });
+  const result = await callSheetsWebApp({
+    action: "agenda_slots",
+    dia,
+    diaKey,
+  });
   if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: result.status });
+    return NextResponse.json(
+      { error: result.error },
+      {
+        status: result.status,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
   }
 
-  return NextResponse.json({
-    ok: true,
-    occupied: Array.isArray(result.data.occupied) ? result.data.occupied : [],
-  });
+  const occupied = canonicalizeOccupied(
+    Array.isArray(result.data.occupied) ? result.data.occupied : [],
+  );
+
+  return NextResponse.json(
+    { ok: true, occupied },
+    { headers: { "Cache-Control": "no-store, max-age=0" } },
+  );
 }
 
 export async function POST(request: Request) {
@@ -159,7 +219,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await callSheetsWebApp({ nombre, whatsapp, dia, horario });
+  const result = await callSheetsWebApp({
+    nombre,
+    whatsapp,
+    dia,
+    diaKey: String(body.diaKey || "").trim(),
+    horario: normalizeSlot(horario),
+  });
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }

@@ -176,14 +176,17 @@ function getQuizLead(body) {
 function appendAgenda(body) {
   var sheet = ensureAgendaSheet();
   var dia = String(body.dia || "").trim();
-  var horario = String(body.horario || "").trim();
-  var occupied = getOccupiedSlots({ dia: dia }).occupied || [];
+  var diaKey = String(body.diaKey || "").trim();
+  var horario = normalizeSlot(body.horario || "");
+  var occupied = getOccupiedSlots({ dia: dia, diaKey: diaKey }).occupied || [];
   if (horario && occupied.indexOf(horario) !== -1) {
     return { ok: false, error: "Ese horario ya está reservado. Elige otro." };
   }
+  // Guardamos diaKey|etiqueta para matching estable en lecturas futuras
+  var diaStored = diaKey ? (diaKey + " | " + dia) : dia;
   sheet.appendRow([
     new Date(),
-    dia,
+    diaStored,
     body.nombre || "",
     body.whatsapp || "",
     horario
@@ -191,19 +194,66 @@ function appendAgenda(body) {
   return { ok: true };
 }
 
+function normalizeDia(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeSlot(value) {
+  return String(value || "")
+    .toUpperCase()
+    .replace(/\./g, "")
+    .replace(/\s+/g, " ")
+    .replace(/A\s*M/g, "AM")
+    .replace(/P\s*M/g, "PM")
+    .trim();
+}
+
+function rowMatchesDia(cellValue, dia, diaKey) {
+  var cell = cellAsText(cellValue);
+  if (!cell) return false;
+  var targetDia = String(dia || "").trim();
+  var targetKey = String(diaKey || "").trim();
+
+  if (targetKey && (cell === targetKey || cell.indexOf(targetKey) === 0 || cell.indexOf(targetKey + " |") === 0)) {
+    return true;
+  }
+  if (targetDia && (cell === targetDia || cell.indexOf(targetDia) !== -1)) {
+    return true;
+  }
+  if (targetDia && normalizeDia(cell) === normalizeDia(targetDia)) {
+    return true;
+  }
+  if (targetKey && targetDia) {
+    var combined = normalizeDia(targetKey + " | " + targetDia);
+    if (normalizeDia(cell) === combined) return true;
+  }
+  return false;
+}
+
+function cellAsText(value) {
+  if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  }
+  return String(value == null ? "" : value).trim();
+}
+
 function getOccupiedSlots(body) {
   var sheet = ensureAgendaSheet();
   var dia = String(body.dia || "").trim();
+  var diaKey = String(body.diaKey || "").trim();
   var occupied = [];
   var lastRow = sheet.getLastRow();
-  if (!dia || lastRow < 2) {
+  if ((!dia && !diaKey) || lastRow < 2) {
     return { ok: true, occupied: occupied };
   }
   var rows = sheet.getRange(2, 1, lastRow, 5).getValues();
   for (var i = 0; i < rows.length; i++) {
-    if (String(rows[i][1]).trim() === dia) {
-      var slot = String(rows[i][4]).trim();
-      if (slot) occupied.push(slot);
+    if (rowMatchesDia(rows[i][1], dia, diaKey)) {
+      var slot = normalizeSlot(rows[i][4]);
+      if (slot && occupied.indexOf(slot) === -1) occupied.push(slot);
     }
   }
   return { ok: true, occupied: occupied };
@@ -215,10 +265,10 @@ function doGet(e) {
     return jsonOutput(setupAgenda({ clear_data: params.clear_data !== "false" }));
   }
   if (params.action === "agenda_slots") {
-    return jsonOutput(getOccupiedSlots({ dia: params.dia || "" }));
+    return jsonOutput(getOccupiedSlots({ dia: params.dia || "", diaKey: params.diaKey || "" }));
   }
   if (params.action === "ping") {
-    return jsonOutput({ ok: true, service: "komvos-agenda", version: "v3" });
+    return jsonOutput({ ok: true, service: "komvos-agenda", version: "v4" });
   }
   return jsonOutput({ ok: true, service: "komvos-agenda", hint: "Usa POST con JSON o ?action=ping" });
 }
